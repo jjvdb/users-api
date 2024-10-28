@@ -11,4 +11,18 @@ type User struct {
 	IsActivated bool      `json:"is_activated"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	// Relationship with RefreshToken
+	RefreshTokens []RefreshToken `gorm:"foreignKey:UserID"`
+}
+
+type RefreshToken struct {
+	ID        uint
+	UserID    uint
+	User      User `gorm:"constraint:OnDelete:CASCADE;"` // Reference to User with cascade delete
+	Device    string
+	Location  *string
+	Token     string
+	Revoked   bool
+	ExpiresAt time.Time
+	CreatedAt time.Time
 }

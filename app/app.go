@@ -47,6 +47,8 @@ func (app *App) InitializeApp() {
 	}
 	appdata.JwtExpiryMinutes = getExpiryMinutes("JWT_EXPIRY_MINUTES")
 	appdata.RefreshExpiryMinutes = getExpiryMinutes("REFRESH_EXPIRY_MINUTES")
+	appdata.RefreshExpiryNoRemember = getExpiryMinutes("REFRESH_EXPIRY_NO_REMEMBER")
+	appdata.JwtExpiryNoRemember = getExpiryMinutes("JWT_EXPIRY_NO_REMEMBER")
 	appdata.SmtpServer = os.Getenv("SMTP_SERVER")
 	appdata.SmtpPassword = os.Getenv("SMTP_PASSWORD")
 	envSmtpPort, _ := strconv.ParseUint(os.Getenv("SMTP_PORT"), 10, 32)
@@ -55,10 +57,11 @@ func (app *App) InitializeApp() {
 	if appdata.SmtpPort == 0 || appdata.SmtpServer == "" || appdata.SmtpPassword == "" || appdata.SmtpUsername == "" {
 		log.Fatal("Failed to load environment variables for SMTP settings.")
 	}
-	appdata.JwtSecret = os.Getenv("JWT_SECRET")
-	if appdata.JwtSecret == "" {
+	jwtSecretString := os.Getenv("JWT_SECRET")
+	if jwtSecretString == "" {
 		log.Fatal("Failed to load JWT_SECRET from .env")
 	}
+	appdata.JwtSecret = []byte(jwtSecretString)
 }
 
 func (app *App) InitializeDatabase() {
@@ -79,6 +82,7 @@ func (app *App) InitializeDatabase() {
 	}
 	modelsToMigrate := []interface{}{
 		&models.User{},
+		&models.RefreshToken{},
 	}
 	for _, model := range modelsToMigrate {
 		if err := appdata.DB.AutoMigrate(model); err != nil {

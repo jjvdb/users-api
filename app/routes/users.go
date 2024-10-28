@@ -41,6 +41,17 @@ func LoginUser(c *fiber.Ctx) error {
 	email := c.FormValue("email")
 	password := c.FormValue("password")
 	remember := c.FormValue("remember") == "true"
+	device := c.FormValue("device")
+	location := c.FormValue("location")
+	var jwtExpiryMinutes uint
+	var refreshExpiryMinutes uint
+	if remember {
+		jwtExpiryMinutes = appdata.JwtExpiryMinutes
+		refreshExpiryMinutes = appdata.RefreshExpiryMinutes
+	} else {
+		jwtExpiryMinutes = appdata.JwtExpiryNoRemember
+		refreshExpiryMinutes = appdata.RefreshExpiryNoRemember
+	}
 	var user models.User
 	result := appdata.DB.Where("email = ?", email).First(&user)
 	errorMessage := ""
@@ -63,6 +74,12 @@ func LoginUser(c *fiber.Ctx) error {
 			"error": "Wrong Password",
 		})
 	}
-	expiry := time.Now() + time.Duration(time.Minute(appdata.JwtExpiryMinutes))
-	return c.SendString("boo")
+	jwtExpiry := time.Now().Add(time.Duration(jwtExpiryMinutes) * time.Minute)
+	refreshExpiry := time.Now().Add(time.Duration(refreshExpiryMinutes) * time.Minute)
+	jwtToken := utils.PrepareAccessToken(&user, &jwtExpiry)
+	refreshToken := utils.PrepareRefreshToken(&user, &refreshExpiry, &device, &location)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"access_token":  jwtToken,
+		"refresh_token": refreshToken,
+	})
 }
