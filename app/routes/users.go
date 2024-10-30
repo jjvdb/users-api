@@ -2,6 +2,7 @@ package routes
 
 import (
 	"errors"
+	"strconv"
 	"time"
 	"versequick-users-api/app/appdata"
 	"versequick-users-api/app/models"
@@ -115,4 +116,9 @@ func RefreshToken(c *fiber.Ctx) error {
 		"access_token":  newJwtToken,
 		"refresh_token": newRefresh,
 	})
+}
+
+func UpdateUser(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	return c.SendString(strconv.Itoa(int(user_id)))
 }

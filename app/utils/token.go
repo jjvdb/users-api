@@ -5,6 +5,7 @@ import (
 	"versequick-users-api/app/appdata"
 	"versequick-users-api/app/models"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -17,8 +18,8 @@ func PrepareAccessToken(user *models.User, remember bool) string {
 	}
 	expiry := time.Now().Add(time.Duration(jwtExpiryMinutes) * time.Minute)
 	claims := jwt.MapClaims{
-		"id":      user.ID,
-		"expires": expiry.Unix(),
+		"id":  user.ID,
+		"exp": expiry.Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signedToken, err := token.SignedString(appdata.JwtSecret)
@@ -48,4 +49,11 @@ func PrepareRefreshToken(user *models.User, device *string, location *string, re
 	} else {
 		return ""
 	}
+}
+
+func GetUserFromJwt(c *fiber.Ctx) uint {
+	user := c.Locals("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	user_id := uint(claims["id"].(float64))
+	return user_id
 }

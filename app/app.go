@@ -8,6 +8,7 @@ import (
 	"versequick-users-api/app/models"
 	"versequick-users-api/app/routes"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -96,6 +97,12 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Post("/users", routes.CreateUser)
 	app.Fiber.Post("/login", routes.LoginUser)
 	app.Fiber.Post("/refreshtoken", routes.RefreshToken)
+
+	app.Fiber.Use(jwtware.New(jwtware.Config{
+		SigningKey: jwtware.SigningKey{Key: appdata.JwtSecret},
+	}))
+
+	app.Fiber.Put("/users", routes.UpdateUser)
 }
 
 func (app *App) Start() {
