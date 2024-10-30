@@ -21,7 +21,8 @@ type RefreshToken struct {
 	User      User `gorm:"constraint:OnDelete:CASCADE;"` // Reference to User with cascade delete
 	Device    string
 	Location  *string
-	Token     string
+	Token     string `gorm:"unique"`
+	Remember  bool
 	Revoked   bool
 	ExpiresAt time.Time
 	CreatedAt time.Time

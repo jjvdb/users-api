@@ -95,6 +95,7 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Get("/", routes.Home)
 	app.Fiber.Post("/users", routes.CreateUser)
 	app.Fiber.Post("/login", routes.LoginUser)
+	app.Fiber.Post("/refreshtoken", routes.RefreshToken)
 }
 
 func (app *App) Start() {
