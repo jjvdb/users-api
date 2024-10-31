@@ -112,6 +112,7 @@ func (app *App) SetupRoutes() {
 
 	app.Fiber.Post("/sendemailverificationemail", routes.SendEmailVerificationEmail)
 	app.Fiber.Put("/users", routes.UpdateUser)
+	app.Fiber.Get("/me", routes.GetSelfInfo)
 }
 
 func (app *App) Start() {

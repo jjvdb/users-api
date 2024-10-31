@@ -269,3 +269,10 @@ func VerifyEmail(c *fiber.Ctx) error {
 	appdata.DB.Delete(&verifyEmail)
 	return c.SendString("Email verified successfully")
 }
+
+func GetSelfInfo(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var user models.User
+	appdata.DB.First(&user, user_id)
+	return c.JSON(user)
+}
