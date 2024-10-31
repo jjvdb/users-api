@@ -12,7 +12,7 @@ type User struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	// Relationship with RefreshToken
-	RefreshTokens []RefreshToken `gorm:"foreignKey:UserID"`
+	RefreshTokens []RefreshToken `json:"-" gorm:"foreignKey:UserID"`
 }
 
 type RefreshToken struct {
