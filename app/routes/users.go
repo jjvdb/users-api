@@ -2,7 +2,7 @@ package routes
 
 import (
 	"errors"
-	"strconv"
+	"net/mail"
 	"time"
 	"versequick-users-api/app/appdata"
 	"versequick-users-api/app/models"
@@ -21,6 +21,13 @@ func CreateUser(c *fiber.Ctx) error {
 			"error": "Email and password are required",
 		})
 	}
+	address, err := mail.ParseAddress(email)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Bad Email",
+		})
+	}
+	email = address.Address
 	hashedPassword := utils.HashPassword(password)
 	user := models.User{Email: email, Password: hashedPassword, Name: name}
 	result := appdata.DB.Create(&user)
@@ -120,5 +127,25 @@ func RefreshToken(c *fiber.Ctx) error {
 
 func UpdateUser(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
-	return c.SendString(strconv.Itoa(int(user_id)))
+	var user models.User
+	appdata.DB.First(&user, user_id)
+	email := c.FormValue("email")
+	name := c.FormValue("name")
+	photoUrl := c.FormValue("photourl")
+
+	if email != "" {
+		address, err := mail.ParseAddress(email)
+		if err == nil {
+			user.Email = address.Address
+			user.IsActivated = false
+		}
+	}
+	if name != "" {
+		user.Name = name
+	}
+	if photoUrl != "" {
+		user.PhotoUrl = &photoUrl
+	}
+	appdata.DB.Save(&user)
+	return c.JSON(user)
 }
