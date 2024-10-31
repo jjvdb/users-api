@@ -276,3 +276,32 @@ func GetSelfInfo(c *fiber.Ctx) error {
 	appdata.DB.First(&user, user_id)
 	return c.JSON(user)
 }
+
+func LogoutAll(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	appdata.DB.Where("user_id = ?", user_id).Delete(&models.RefreshToken{})
+	return c.SendString(fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices.", appdata.JwtExpiryMinutes))
+}
+
+func Logout(c *fiber.Ctx) error {
+	token := c.Get("Refresh")
+	if token == "" {
+		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Need refresh token in the header",
+		})
+	}
+	var refreshToken models.RefreshToken
+	result := appdata.DB.Where("token = ?", token).First(&refreshToken)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Refresh token invalid",
+			})
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Something went wrong, try again later",
+			})
+		}
+	}
+	return c.SendString(fmt.Sprintf("Logout successful, it might take upto %d minutes to completely log out of the device.", appdata.JwtExpiryMinutes))
+}

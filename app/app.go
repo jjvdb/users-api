@@ -105,6 +105,7 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Post("/sendforgotpasswordemail", routes.SendForgotPasswordEmail)
 	app.Fiber.Post("/changepassword", routes.ChangePassword)
 	app.Fiber.Post("/verifyemail", routes.VerifyEmail)
+	app.Fiber.Post("/logout", routes.Logout)
 
 	app.Fiber.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: appdata.JwtSecret},
@@ -113,6 +114,7 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Post("/sendemailverificationemail", routes.SendEmailVerificationEmail)
 	app.Fiber.Put("/users", routes.UpdateUser)
 	app.Fiber.Get("/me", routes.GetSelfInfo)
+	app.Fiber.Post("/logoutall", routes.LogoutAll)
 }
 
 func (app *App) Start() {
