@@ -27,3 +27,21 @@ type RefreshToken struct {
 	ExpiresAt time.Time
 	CreatedAt time.Time
 }
+
+type ForgotPassword struct {
+	ID        uint
+	UserID    uint
+	User      User   `gorm:"constraint:OnDelete:CASCADE;"`
+	Token     string `gorm:"unique"`
+	ExpiresAt time.Time
+	CreatedAt time.Time
+}
+
+type VerifyEmail struct {
+	ID        uint
+	UserID    uint
+	User      User   `gorm:"constraint:OnDelete:CASCADE;"`
+	Token     string `gorm:"unique"`
+	ExpiresAt time.Time
+	CreatedAt time.Time
+}

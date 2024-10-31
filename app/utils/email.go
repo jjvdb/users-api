@@ -6,13 +6,16 @@ import (
 	gomail "gopkg.in/mail.v2"
 )
 
-func SendEmail(to string, subject string, body string) error {
+func SendEmail(to string, subject string, body string, html bool) error {
 	m := gomail.NewMessage()
 
 	m.SetHeader("From", appdata.SmtpUsername)
 	m.SetHeader("To", to)
 	m.SetHeader("Subject", subject)
-	m.SetBody("text/plain", "This is Gomail test body")
+	m.SetBody("text/plain", body)
+	if html {
+		m.SetBody("text/html", body)
+	}
 	d := gomail.NewDialer(appdata.SmtpServer, int(appdata.SmtpPort), appdata.SmtpUsername, appdata.SmtpPassword)
 
 	// This is only needed when SSL/TLS certificate is not valid on server.

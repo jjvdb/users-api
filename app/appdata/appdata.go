@@ -14,3 +14,4 @@ var JwtSecret []byte
 var RefreshExpiryMinutes uint
 var RefreshExpiryNoRemember uint
 var JwtExpiryNoRemember uint
+var ResetValidMinutes uint

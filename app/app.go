@@ -10,6 +10,7 @@ import (
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -63,6 +64,7 @@ func (app *App) InitializeApp() {
 		log.Fatal("Failed to load JWT_SECRET from .env")
 	}
 	appdata.JwtSecret = []byte(jwtSecretString)
+	appdata.ResetValidMinutes = getExpiryMinutes("RESET_VALID_MINUTES")
 }
 
 func (app *App) InitializeDatabase() {
@@ -84,6 +86,8 @@ func (app *App) InitializeDatabase() {
 	modelsToMigrate := []interface{}{
 		&models.User{},
 		&models.RefreshToken{},
+		&models.ForgotPassword{},
+		&models.VerifyEmail{},
 	}
 	for _, model := range modelsToMigrate {
 		if err := appdata.DB.AutoMigrate(model); err != nil {
@@ -93,15 +97,20 @@ func (app *App) InitializeDatabase() {
 }
 
 func (app *App) SetupRoutes() {
+	app.Fiber.Use(recover.New())
 	app.Fiber.Get("/", routes.Home)
 	app.Fiber.Post("/users", routes.CreateUser)
 	app.Fiber.Post("/login", routes.LoginUser)
 	app.Fiber.Post("/refreshtoken", routes.RefreshToken)
+	app.Fiber.Post("/sendforgotpasswordemail", routes.SendForgotPasswordEmail)
+	app.Fiber.Post("/changepassword", routes.ChangePassword)
+	app.Fiber.Post("/verifyemail", routes.VerifyEmail)
 
 	app.Fiber.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: appdata.JwtSecret},
 	}))
 
+	app.Fiber.Post("/sendemailverificationemail", routes.SendEmailVerificationEmail)
 	app.Fiber.Put("/users", routes.UpdateUser)
 }
 
