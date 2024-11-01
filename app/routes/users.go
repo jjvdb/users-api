@@ -181,7 +181,7 @@ func SendForgotPasswordEmail(c *fiber.Ctx) error {
 			"error": "Something went wrong, try again later",
 		})
 	} else {
-		return c.SendString("Password reset email sent successfully")
+		return c.JSON(fiber.Map{"message": "Password reset email sent successfully"})
 	}
 }
 
@@ -206,7 +206,7 @@ func ChangePassword(c *fiber.Ctx) error {
 	user.Password = hashedPassword
 	appdata.DB.Save(&user)
 	appdata.DB.Delete(&forgotPassword)
-	return c.SendString(fmt.Sprintf("Password changed successfully. The link is valid for %d minutes.", appdata.ResetValidMinutes))
+	return c.JSON(fiber.Map{"message": fmt.Sprintf("Password changed successfully. The link is valid for %d minutes.", appdata.ResetValidMinutes)})
 }
 
 func SendEmailVerificationEmail(c *fiber.Ctx) error {
@@ -244,7 +244,7 @@ func SendEmailVerificationEmail(c *fiber.Ctx) error {
 			"error": "Something went wrong, try again later",
 		})
 	} else {
-		return c.SendString(fmt.Sprintf("Verification email sent successfully. The link is valid for %d minutes.", appdata.ResetValidMinutes))
+		return c.JSON(fiber.Map{"message": fmt.Sprintf("Verification email sent successfully. The link is valid for %d minutes.", appdata.ResetValidMinutes)})
 	}
 }
 
@@ -267,7 +267,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 	user.IsActivated = true
 	appdata.DB.Save(&user)
 	appdata.DB.Delete(&verifyEmail)
-	return c.SendString("Email verified successfully")
+	return c.JSON(fiber.Map{"message": "Email verified successfully"})
 }
 
 func GetSelfInfo(c *fiber.Ctx) error {
@@ -280,7 +280,7 @@ func GetSelfInfo(c *fiber.Ctx) error {
 func LogoutAll(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	appdata.DB.Where("user_id = ?", user_id).Delete(&models.RefreshToken{})
-	return c.SendString(fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices.", appdata.JwtExpiryMinutes))
+	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices completely.", appdata.JwtExpiryMinutes)})
 }
 
 func Logout(c *fiber.Ctx) error {
@@ -303,5 +303,5 @@ func Logout(c *fiber.Ctx) error {
 			})
 		}
 	}
-	return c.SendString(fmt.Sprintf("Logout successful, it might take upto %d minutes to completely log out of the device.", appdata.JwtExpiryMinutes))
+	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to completely log out of the device completely.", appdata.JwtExpiryMinutes)})
 }
