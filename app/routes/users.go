@@ -185,7 +185,7 @@ func SendForgotPasswordEmail(c *fiber.Ctx) error {
 	}
 }
 
-func ChangePassword(c *fiber.Ctx) error {
+func ResetPassword(c *fiber.Ctx) error {
 	token := c.FormValue("token")
 	var forgotPassword models.ForgotPassword
 	result := appdata.DB.Where("token = ?", token).First(&forgotPassword)
@@ -207,6 +207,31 @@ func ChangePassword(c *fiber.Ctx) error {
 	appdata.DB.Save(&user)
 	appdata.DB.Delete(&forgotPassword)
 	return c.JSON(fiber.Map{"message": fmt.Sprintf("Password changed successfully. The link is valid for %d minutes.", appdata.ResetValidMinutes)})
+}
+
+func ChangePassword(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var user models.User
+	appdata.DB.First(&user, user_id)
+	oldPassword := c.FormValue("oldpassword")
+	newPassword := c.FormValue("newPassword")
+	confirmPassword := c.FormValue("confirmPassword")
+	if newPassword != confirmPassword {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "New password and confirm password did not match",
+		})
+	}
+	if !utils.CheckPassword(oldPassword, user.Password) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Old password wrong. If you forgot the password, request a reset link.",
+		})
+	}
+	hashedPassword := utils.HashPassword(newPassword)
+	user.Password = hashedPassword
+	appdata.DB.Save(&user)
+	return c.JSON(fiber.Map{
+		"message": "Password updated successfully",
+	})
 }
 
 func SendEmailVerificationEmail(c *fiber.Ctx) error {

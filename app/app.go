@@ -103,7 +103,7 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Post("/login", routes.LoginUser)
 	app.Fiber.Post("/refreshtoken", routes.RefreshToken)
 	app.Fiber.Post("/sendforgotpasswordemail", routes.SendForgotPasswordEmail)
-	app.Fiber.Post("/changepassword", routes.ChangePassword)
+	app.Fiber.Post("/resetpassword", routes.ResetPassword)
 	app.Fiber.Post("/verifyemail", routes.VerifyEmail)
 	app.Fiber.Post("/logout", routes.Logout)
 
@@ -115,6 +115,7 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Put("/users", routes.UpdateUser)
 	app.Fiber.Get("/me", routes.GetSelfInfo)
 	app.Fiber.Post("/logoutall", routes.LogoutAll)
+	app.Fiber.Post("/changepassword", routes.ChangePassword)
 }
 
 func (app *App) Start() {
