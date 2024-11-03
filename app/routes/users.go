@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/mail"
+	"strconv"
 	"time"
 	"versequick-users-api/app/appdata"
 	"versequick-users-api/app/models"
@@ -298,7 +299,7 @@ func VerifyEmail(c *fiber.Ctx) error {
 func GetSelfInfo(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	var user models.User
-	appdata.DB.First(&user, user_id)
+	appdata.DB.Preload("UserPreferences").First(&user, user_id)
 	return c.JSON(user)
 }
 
@@ -329,4 +330,55 @@ func Logout(c *fiber.Ctx) error {
 		}
 	}
 	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to completely log out of the device completely.", appdata.JwtExpiryMinutes)})
+}
+
+func UpdateUserPreferences(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreferences
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	userPreferences.UserID = user_id
+
+	darkModeString := c.FormValue("darkmode")
+	theme := c.FormValue("theme")
+	translation := c.FormValue("translation")
+	lastReadBook := c.FormValue("lastreadbook")
+	lastReadChapterString := c.FormValue("lastreadchapter")
+	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
+	chapter := uint(lastReadChapterInt)
+
+	if darkModeString == "true" {
+		userPreferences.DarkMode = true
+	} else if darkModeString == "false" {
+		userPreferences.DarkMode = false
+	}
+
+	for _, t := range appdata.AvailableTranslations {
+		if t == translation {
+			userPreferences.Translation = &translation
+		}
+	}
+
+	for _, b := range appdata.Books {
+		if b.Book == lastReadBook {
+			userPreferences.LastReadBook = &lastReadBook
+		}
+	}
+	if chapter != 0 {
+		userPreferences.LastReadChapter = chapter
+	}
+	if theme != "" {
+		userPreferences.Theme = &theme
+	}
+	appdata.DB.Save(&userPreferences)
+	return c.JSON(userPreferences)
+}
+
+func DeleteUserPreferences(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreferences
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	appdata.DB.Delete(&userPreferences)
+	return c.JSON(fiber.Map{
+		"message": "User preferences deleted",
+	})
 }
