@@ -90,6 +90,8 @@ func (app *App) InitializeDatabase() {
 		&models.VerifyEmail{},
 		&models.ReadHistory{},
 		&models.UserPreferences{},
+		&models.Bookmark{},
+		&models.Note{},
 	}
 	for _, model := range modelsToMigrate {
 		if err := appdata.DB.AutoMigrate(model); err != nil {
@@ -122,6 +124,12 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Delete("/markchapterasread", routes.MarkChapterAsUnread)
 	app.Fiber.Put("/userpreferences", routes.UpdateUserPreferences)
 	app.Fiber.Delete("/userpreferences", routes.DeleteUserPreferences)
+	app.Fiber.Post("/bookmark", routes.AddBookmark)
+	app.Fiber.Delete("/bookmark", routes.DeleteBookmark)
+	app.Fiber.Post("/note", routes.CreateNote)
+	app.Fiber.Delete("/note/:noteid", routes.DeleteNote)
+	app.Fiber.Put("/note/:noteid", routes.UpdateNote)
+	app.Fiber.Get("/note", routes.GetNotesOfUser)
 }
 
 func (app *App) Start() {
