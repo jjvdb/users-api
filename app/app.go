@@ -88,6 +88,8 @@ func (app *App) InitializeDatabase() {
 		&models.RefreshToken{},
 		&models.ForgotPassword{},
 		&models.VerifyEmail{},
+		&models.ReadHistory{},
+		&models.UserPreferences{},
 	}
 	for _, model := range modelsToMigrate {
 		if err := appdata.DB.AutoMigrate(model); err != nil {
@@ -116,6 +118,8 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Get("/me", routes.GetSelfInfo)
 	app.Fiber.Post("/logoutall", routes.LogoutAll)
 	app.Fiber.Post("/changepassword", routes.ChangePassword)
+	app.Fiber.Post("/markchapterasread", routes.MarkChapterAsRead)
+	app.Fiber.Delete("/markchapterasread", routes.MarkChapterAsUnread)
 }
 
 func (app *App) Start() {
