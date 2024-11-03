@@ -361,11 +361,14 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	for _, b := range appdata.Books {
 		if b.Book == lastReadBook {
 			userPreferences.LastReadBook = &lastReadBook
+			if chapter != 0 {
+				if chapter <= b.Chapters {
+					userPreferences.LastReadChapter = chapter
+				}
+			}
 		}
 	}
-	if chapter != 0 {
-		userPreferences.LastReadChapter = chapter
-	}
+
 	if theme != "" {
 		userPreferences.Theme = &theme
 	}
