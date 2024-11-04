@@ -89,7 +89,7 @@ func (app *App) InitializeDatabase() {
 		&models.ForgotPassword{},
 		&models.VerifyEmail{},
 		&models.ReadHistory{},
-		&models.UserPreferences{},
+		&models.UserPreference{},
 		&models.Bookmark{},
 		&models.Note{},
 	}

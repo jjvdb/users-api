@@ -219,13 +219,18 @@ func VerifyEmail(c *fiber.Ctx) error {
 func GetSelfInfo(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	var user models.User
-	appdata.DB.Preload("UserPreferences").First(&user, user_id)
+	appdata.DB.First(&user, user_id)
+	var preference models.UserPreference
+	result := appdata.DB.Where("user_id = ?", user_id).First(&preference)
+	if result.Error == nil {
+		user.Preference = preference
+	}
 	return c.JSON(user)
 }
 
 func UpdateUserPreferences(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
-	var userPreferences models.UserPreferences
+	var userPreferences models.UserPreference
 	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
 	userPreferences.UserID = user_id
 
@@ -234,6 +239,11 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	translation := c.FormValue("translation")
 	lastReadBook := c.FormValue("lastreadbook")
 	lastReadChapterString := c.FormValue("lastreadchapter")
+	fontSizeString := c.FormValue("fontsize")
+	fontFamilyString := c.FormValue("fontfamily")
+	referenceAtBottom := c.FormValue("referenceatbottom")
+	fontSize, _ := strconv.Atoi(fontSizeString)
+	fontFamily, _ := strconv.Atoi(fontFamilyString)
 	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
 	chapter := uint(lastReadChapterInt)
 
@@ -263,13 +273,27 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	if theme != "" {
 		userPreferences.Theme = &theme
 	}
+
+	if fontSize != 0 {
+		userPreferences.FontSize = uint(fontSize)
+	}
+	if fontFamily != 0 {
+		userPreferences.FontFamily = uint(fontFamily)
+	}
+	if referenceAtBottom != "" {
+		if referenceAtBottom == "true" {
+			userPreferences.ReferenceAtBottom = true
+		} else if referenceAtBottom == "false" {
+			userPreferences.ReferenceAtBottom = false
+		}
+	}
 	appdata.DB.Save(&userPreferences)
 	return c.JSON(userPreferences)
 }
 
 func DeleteUserPreferences(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
-	var userPreferences models.UserPreferences
+	var userPreferences models.UserPreference
 	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
 	appdata.DB.Delete(&userPreferences)
 	return c.JSON(fiber.Map{
