@@ -258,7 +258,12 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 			userPreferences.Translation = &translation
 		}
 	}
-
+	if userPreferences.Translation != nil || *userPreferences.Translation != "" {
+		parallelTranslations := c.FormValue("paralleltranslations")
+		if parallelTranslations != "" {
+			userPreferences.ParallelTranslations = &parallelTranslations
+		}
+	}
 	for _, b := range appdata.Books {
 		if b.Book == lastReadBook {
 			userPreferences.LastReadBook = &lastReadBook
