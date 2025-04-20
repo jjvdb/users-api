@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"versequick-users-api/app/appdata"
-	"versequick-users-api/app/models"
-	"versequick-users-api/app/routes"
+	"users-api/app/appdata"
+	"users-api/app/models"
+	"users-api/app/routes"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"

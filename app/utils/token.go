@@ -2,8 +2,8 @@ package utils
 
 import (
 	"time"
-	"versequick-users-api/app/appdata"
-	"versequick-users-api/app/models"
+	"users-api/app/appdata"
+	"users-api/app/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
