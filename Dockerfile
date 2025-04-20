@@ -5,7 +5,7 @@ COPY . .
 RUN go build .
 
 # Stage 2 - run
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/users-api /app/
 CMD ["/app/users-api"]

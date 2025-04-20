@@ -23,7 +23,7 @@ type App struct {
 
 func NewApp() *App {
 	fiberApp := fiber.New(fiber.Config{
-		AppName: "VerseQuick Users API",
+		AppName: "Users API",
 	})
 	return &App{
 		Fiber: fiberApp,
@@ -43,10 +43,7 @@ func getExpiryMinutes(s string) uint {
 }
 
 func (app *App) InitializeApp() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Failed to load environment variables from .env file")
-	}
+	_ = godotenv.Load()
 	appdata.JwtExpiryMinutes = getExpiryMinutes("JWT_EXPIRY_MINUTES")
 	appdata.RefreshExpiryMinutes = getExpiryMinutes("REFRESH_EXPIRY_MINUTES")
 	appdata.RefreshExpiryNoRemember = getExpiryMinutes("REFRESH_EXPIRY_NO_REMEMBER")
