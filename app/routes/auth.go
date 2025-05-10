@@ -12,15 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func LoginUser(c *fiber.Ctx) error {
-	email := c.FormValue("email")
-	password := c.FormValue("password")
-	remember := c.FormValue("remember") == "true"
-	device := c.FormValue("device")
-	location := c.FormValue("location")
 
+func LoginUser(c *fiber.Ctx) error {
+	var req models.LoginRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
 	var user models.User
-	result := appdata.DB.Where("email = ?", email).First(&user)
+	result := appdata.DB.Where("email = ?", req.Email).First(&user)
 	errorMessage := ""
 	var returnStatus int
 	if result.Error != nil {
@@ -35,14 +36,14 @@ func LoginUser(c *fiber.Ctx) error {
 			"error": errorMessage,
 		})
 	}
-	passwordCorrect := utils.CheckPassword(password, user.Password)
+	passwordCorrect := utils.CheckPassword(req.Password, user.Password)
 	if !passwordCorrect {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Wrong Password",
 		})
 	}
-	jwtToken := utils.PrepareAccessToken(&user, remember)
-	refreshToken := utils.PrepareRefreshToken(&user, &device, &location, remember)
+	jwtToken := utils.PrepareAccessToken(&user, req.Remember)
+	refreshToken := utils.PrepareRefreshToken(&user, req.Device, req.Location, req.Remember)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"access_token":  jwtToken,
 		"refresh_token": refreshToken,

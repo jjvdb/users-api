@@ -91,3 +91,12 @@ type Note struct {
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
+
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Remember bool   `json:"remember"`
+	Device   *string `json:"device"`
+	Location *string `json:"location"`
+}
