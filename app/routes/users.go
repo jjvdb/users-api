@@ -15,23 +15,21 @@ import (
 )
 
 func CreateUser(c *fiber.Ctx) error {
-	email := c.FormValue("email")
-	password := c.FormValue("password")
-	name := c.FormValue("name")
-	if email == "" || password == "" {
+	var req models.SignupRequest
+	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Email and password are required",
+			"error": "Invalid request body",
 		})
 	}
-	address, err := mail.ParseAddress(email)
+	address, err := mail.ParseAddress(req.Email)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Bad Email",
 		})
 	}
-	email = address.Address
-	hashedPassword := utils.HashPassword(password)
-	user := models.User{Email: email, Password: hashedPassword, Name: name}
+	email := address.Address
+	hashedPassword := utils.HashPassword(req.Password)
+	user := models.User{Email: email, Password: hashedPassword, Name: req.Name}
 	result := appdata.DB.Create(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {

@@ -92,11 +92,16 @@ type Note struct {
 	UpdatedAt     time.Time `json:"updated_at"`
 }
 
-
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Remember bool   `json:"remember"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Remember bool    `json:"remember"`
 	Device   *string `json:"device"`
 	Location *string `json:"location"`
+}
+
+type SignupRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
