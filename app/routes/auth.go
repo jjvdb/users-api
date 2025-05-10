@@ -86,7 +86,7 @@ func RefreshToken(c *fiber.Ctx) error {
 	var user models.User
 	appdata.DB.First(&user, refresh.UserID)
 	newJwtToken := utils.PrepareAccessToken(&user, refresh.Remember)
-	newRefresh := utils.PrepareRefreshToken(&user, &refresh.Device, refresh.Location, refresh.Remember)
+	newRefresh := utils.PrepareRefreshToken(&user, refresh.Device, refresh.Location, refresh.Remember)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"access_token":  newJwtToken,
 		"refresh_token": newRefresh,

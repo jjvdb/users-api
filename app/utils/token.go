@@ -42,7 +42,7 @@ func PrepareRefreshToken(user *models.User, device *string, location *string, re
 	oneRefreshPeriodBefore := time.Now().Add(-time.Duration(appdata.RefreshExpiryMinutes) * time.Minute)
 	appdata.DB.Where("expires_at < ?", oneRefreshPeriodBefore).Delete(&models.RefreshToken{})
 	tokenString := GenerateAlphanumeric(25)
-	refreshToken := models.RefreshToken{UserID: user.ID, Device: *device, Location: location, Token: tokenString, ExpiresAt: expiry, Remember: remember}
+	refreshToken := models.RefreshToken{UserID: user.ID, Device: device, Location: location, Token: tokenString, ExpiresAt: expiry, Remember: remember}
 	result := appdata.DB.Create(&refreshToken)
 	if result.Error == nil {
 		return tokenString

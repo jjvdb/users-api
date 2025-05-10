@@ -15,6 +15,7 @@ var RefreshExpiryMinutes uint
 var RefreshExpiryNoRemember uint
 var JwtExpiryNoRemember uint
 var ResetValidMinutes uint
+var LogRequests bool
 
 const BookCount uint = 66
 const OtCount uint = 39

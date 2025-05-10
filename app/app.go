@@ -10,11 +10,12 @@ import (
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
+	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormlogger "gorm.io/gorm/logger"
 )
 
 type App struct {
@@ -53,6 +54,7 @@ func (app *App) InitializeApp() {
 	envSmtpPort, _ := strconv.ParseUint(os.Getenv("SMTP_PORT"), 10, 32)
 	appdata.SmtpPort = uint(envSmtpPort)
 	appdata.SmtpUsername = os.Getenv("SMTP_FROM")
+	appdata.LogRequests = os.Getenv("LOG_REQUESTS") == "true"
 	if appdata.SmtpPort == 0 || appdata.SmtpServer == "" || appdata.SmtpPassword == "" || appdata.SmtpUsername == "" {
 		log.Fatal("Failed to load environment variables for SMTP settings.")
 	}
@@ -67,9 +69,9 @@ func (app *App) InitializeApp() {
 func (app *App) InitializeDatabase() {
 	var err error
 	dsn := os.Getenv("DSN")
-	gormLogger := logger.New(
+	gormLogger := gormlogger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags),
-		logger.Config{
+		gormlogger.Config{
 			IgnoreRecordNotFoundError: true,
 		},
 	)
@@ -99,6 +101,12 @@ func (app *App) InitializeDatabase() {
 
 func (app *App) SetupRoutes() {
 	app.Fiber.Use(recover.New())
+	if appdata.LogRequests {
+		app.Fiber.Use(fiberlogger.New(fiberlogger.Config{
+    		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+	}))
+
+	}
 	app.Fiber.Get("/", routes.Home)
 	app.Fiber.Post("/users", routes.CreateUser)
 	app.Fiber.Post("/login", routes.LoginUser)

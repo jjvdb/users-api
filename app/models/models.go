@@ -33,7 +33,7 @@ type RefreshToken struct {
 	ID        uint
 	UserID    uint
 	User      User `gorm:"constraint:OnDelete:CASCADE;"` // Reference to User with cascade delete
-	Device    string
+	Device    *string
 	Location  *string
 	Token     string `gorm:"unique"`
 	Remember  bool
