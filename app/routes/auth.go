@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 func LoginUser(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -21,12 +20,17 @@ func LoginUser(c *fiber.Ctx) error {
 		})
 	}
 	var user models.User
-	result := appdata.DB.Where("email = ?", req.Email).First(&user)
+	var result *gorm.DB
+	if utils.IsEmail(req.EmailOrUsername) {
+		result = appdata.DB.Where("email = ?", req.EmailOrUsername).First(&user)
+	} else {
+		result = appdata.DB.Where("username = ?", req.EmailOrUsername).First(&user)
+	}
 	errorMessage := ""
 	var returnStatus int
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			errorMessage = "Email not found"
+			errorMessage = "Email or Username not found"
 			returnStatus = fiber.StatusNotFound
 		} else {
 			errorMessage = "Something went wrong, try again later"

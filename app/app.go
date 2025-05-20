@@ -103,11 +103,12 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Use(recover.New())
 	if appdata.LogRequests {
 		app.Fiber.Use(fiberlogger.New(fiberlogger.Config{
-    		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
-	}))
+			Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+		}))
 
 	}
 	app.Fiber.Get("/", routes.Home)
+	app.Fiber.Get("/checkusernameavailability", routes.CheckIfUsernameAvailable)
 	app.Fiber.Post("/users", routes.CreateUser)
 	app.Fiber.Post("/login", routes.LoginUser)
 	app.Fiber.Post("/refreshtoken", routes.RefreshToken)

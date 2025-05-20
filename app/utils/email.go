@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/mail"
 	"users-api/app/appdata"
 
 	gomail "gopkg.in/mail.v2"
@@ -28,4 +29,9 @@ func SendEmail(to string, subject string, body string, html bool) error {
 	}
 
 	return nil
+}
+
+func IsEmail(s string) bool {
+	_, err := mail.ParseAddress(s)
+	return err == nil
 }

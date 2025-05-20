@@ -14,11 +14,43 @@ import (
 	"gorm.io/gorm"
 )
 
+func CheckIfUsernameAvailable(c *fiber.Ctx) error {
+	username := c.Query("username")
+	if username == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username is required",
+		})
+	}
+
+	var user models.User
+	result := appdata.DB.Where("username = ?", username).First(&user)
+
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return c.JSON(fiber.Map{
+				"available": true,
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Database error",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"available": false,
+	})
+}
+
 func CreateUser(c *fiber.Ctx) error {
 	var req models.SignupRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
+		})
+	}
+	if utils.IsEmail(req.Username) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Username cannot be an email",
 		})
 	}
 	address, err := mail.ParseAddress(req.Email)
@@ -34,7 +66,7 @@ func CreateUser(c *fiber.Ctx) error {
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Email already exists",
+				"error": "Email or Username already exists",
 			})
 		} else {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -51,6 +83,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	appdata.DB.First(&user, user_id)
 	email := c.FormValue("email")
 	name := c.FormValue("name")
+	username := c.FormValue("username")
 	photoUrl := c.FormValue("photourl")
 
 	if email != "" {
@@ -66,7 +99,21 @@ func UpdateUser(c *fiber.Ctx) error {
 	if photoUrl != "" {
 		user.PhotoUrl = &photoUrl
 	}
-	appdata.DB.Save(&user)
+	if username != "" {
+		user.Username = username
+	}
+	result := appdata.DB.Save(&user)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Email or Username already exists",
+			})
+		} else {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Something went wrong, try again later",
+			})
+		}
+	}
 	return c.JSON(user)
 }
 

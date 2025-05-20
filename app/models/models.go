@@ -4,8 +4,9 @@ import "time"
 
 type User struct {
 	ID            uint           `json:"id"`
-	Email         string         `json:"email" gorm:"unique"`
-	Password      string         `json:"-"` // This field will be omitted from the JSON output
+	Email         string         `json:"email" gorm:"unique;not null"`
+	Username      string         `json:"username" gorm:"unique;not null"`
+	Password      string         `json:"-" gorm:"not null"` // This field will be omitted from the JSON output
 	Name          string         `json:"name"`
 	PhotoUrl      *string        `json:"photo_url"`
 	IsActivated   bool           `json:"is_activated"`
@@ -93,15 +94,16 @@ type Note struct {
 }
 
 type LoginRequest struct {
-	Email    string  `json:"email"`
-	Password string  `json:"password"`
-	Remember bool    `json:"remember"`
-	Device   *string `json:"device"`
-	Location *string `json:"location"`
+	EmailOrUsername string  `json:"emailorusername"`
+	Password        string  `json:"password"`
+	Remember        bool    `json:"remember"`
+	Device          *string `json:"device"`
+	Location        *string `json:"location"`
 }
 
 type SignupRequest struct {
 	Name     string `json:"name"`
+	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
