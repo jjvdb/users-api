@@ -123,5 +123,15 @@ func Logout(c *fiber.Ctx) error {
 			})
 		}
 	}
-	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to completely log out of the device completely.", appdata.JwtExpiryMinutes)})
+
+	// Delete the refresh token
+	if err := appdata.DB.Delete(&refreshToken).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to delete refresh token",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Logout successful, it might take up to %d minutes to log out of the device completely.", appdata.JwtExpiryMinutes),
+	})
 }
