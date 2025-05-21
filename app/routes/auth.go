@@ -19,6 +19,7 @@ func LoginUser(c *fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
+	req.Trim()
 	var user models.User
 	var result *gorm.DB
 	if utils.IsEmail(req.EmailOrUsername) {

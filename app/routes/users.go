@@ -48,6 +48,7 @@ func CreateUser(c *fiber.Ctx) error {
 			"error": "Invalid request body",
 		})
 	}
+	req.Trim()
 	if utils.IsEmail(req.Username) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Username cannot be an email",
@@ -102,6 +103,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	if username != "" {
 		user.Username = username
 	}
+	user.Trim()
 	result := appdata.DB.Save(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {

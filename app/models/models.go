@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type User struct {
 	ID            uint           `json:"id"`
@@ -14,6 +17,12 @@ type User struct {
 	UpdatedAt     time.Time      `json:"updated_at"`
 	RefreshTokens []RefreshToken `json:"-" gorm:"foreignKey:UserID"`
 	Preference    UserPreference `json:"preference" gorm:"foreignKey:UserID"`
+}
+
+func (user *User) Trim() {
+	user.Email = strings.TrimSpace(user.Email)
+	user.Username = strings.TrimSpace(user.Username)
+	user.Name = strings.TrimSpace(user.Name)
 }
 
 type UserPreference struct {
@@ -101,9 +110,19 @@ type LoginRequest struct {
 	Location        *string `json:"location"`
 }
 
+func (req *LoginRequest) Trim() {
+	req.EmailOrUsername = strings.TrimSpace(req.EmailOrUsername)
+}
+
 type SignupRequest struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+func (req *SignupRequest) Trim() {
+	req.Name = strings.TrimSpace(req.Name)
+	req.Username = strings.TrimSpace(req.Username)
+	req.Email = strings.TrimSpace(req.Email)
 }
