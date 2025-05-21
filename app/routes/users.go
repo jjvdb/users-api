@@ -61,7 +61,7 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 	email := address.Address
 	hashedPassword := utils.HashPassword(req.Password)
-	user := models.User{Email: email, Password: hashedPassword, Name: req.Name}
+	user := models.User{Email: email, Username: req.Username, Password: hashedPassword, Name: req.Name}
 	result := appdata.DB.Create(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
