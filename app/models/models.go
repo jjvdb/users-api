@@ -26,17 +26,18 @@ func (user *User) Trim() {
 }
 
 type UserPreference struct {
-	ID                   uint    `json:"id"`
-	UserID               uint    `json:"user_id" gorm:"unique"`
-	DarkMode             bool    `json:"dark_mode"`
-	Theme                *string `json:"theme"`
-	Translation          *string `json:"translation"`
-	ParallelTranslations *string `json:"parallel_translations"`
-	LastReadBook         *string `json:"last_read_book"`
-	LastReadChapter      uint    `json:"last_read_chapter"`
-	FontSize             uint    `json:"font_size"`
-	FontFamily           uint    `json:"font_family"`
-	ReferenceAtBottom    bool    `json:"reference_at_bottom"`
+	ID                    uint    `json:"id"`
+	UserID                uint    `json:"user_id" gorm:"unique"`
+	DarkMode              bool    `json:"dark_mode"`
+	Theme                 *string `json:"theme"`
+	Translation           *string `json:"translation"`
+	ParallelTranslations  *string `json:"parallel_translations"`
+	LastReadBook          *string `json:"last_read_book"`
+	LastReadChapter       uint    `json:"last_read_chapter"`
+	FontSize              uint    `json:"font_size"`
+	FontFamily            uint    `json:"font_family"`
+	ReferenceAtBottom     bool    `json:"reference_at_bottom"`
+	DoNotUseAbbreviations bool    `json:"do_not_use_abbreviations"`
 }
 
 type RefreshToken struct {
