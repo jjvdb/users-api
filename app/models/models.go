@@ -34,7 +34,7 @@ type UserPreference struct {
 	ParallelTranslations  *string `json:"parallel_translations"`
 	LastReadBook          *string `json:"last_read_book"`
 	LastReadChapter       uint    `json:"last_read_chapter"`
-	FontSize              uint    `json:"font_size"`
+	FontSize              int     `json:"font_size"`
 	FontFamily            uint    `json:"font_family"`
 	ReferenceAtBottom     bool    `json:"reference_at_bottom"`
 	DoNotUseAbbreviations bool    `json:"do_not_use_abbreviations"`

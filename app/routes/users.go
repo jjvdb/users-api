@@ -327,7 +327,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	}
 
 	if fontSize != 0 {
-		userPreferences.FontSize = uint(fontSize)
+		userPreferences.FontSize = int(fontSize)
 	}
 	if fontFamily != 0 {
 		userPreferences.FontFamily = uint(fontFamily)
