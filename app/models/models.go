@@ -13,6 +13,7 @@ type User struct {
 	Name          string         `json:"name"`
 	PhotoUrl      *string        `json:"photo_url"`
 	IsActivated   bool           `json:"is_activated"`
+	Bio           string         `json:"bio"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	RefreshTokens []RefreshToken `json:"-" gorm:"foreignKey:UserID"`
@@ -23,22 +24,24 @@ func (user *User) Trim() {
 	user.Email = strings.TrimSpace(user.Email)
 	user.Username = strings.TrimSpace(user.Username)
 	user.Name = strings.TrimSpace(user.Name)
+	user.Bio = strings.TrimSpace(user.Bio)
 }
 
 type UserPreference struct {
-	ID                   uint    `json:"id"`
-	UserID               uint    `json:"user_id" gorm:"unique"`
-	DarkMode             bool    `json:"dark_mode"`
-	Theme                *string `json:"theme"`
-	Translation          *string `json:"translation"`
-	ParallelTranslations *string `json:"parallel_translations"`
-	LastReadBook         *string `json:"last_read_book"`
-	LastReadChapter      uint    `json:"last_read_chapter"`
-	FontSize             int     `json:"font_size"`
-	FontFamily           uint    `json:"font_family"`
-	ReferenceAtBottom    bool    `json:"reference_at_bottom"`
-	UseAbbreviations     bool    `json:"use_abbreviations"`
-	CopyIncludesUrl      bool    `json:"copy_include_url"`
+	ID                      uint    `json:"id"`
+	UserID                  uint    `json:"user_id" gorm:"unique"`
+	DarkMode                bool    `json:"dark_mode"`
+	Theme                   *string `json:"theme"`
+	Translation             *string `json:"translation"`
+	ParallelTranslations    *string `json:"parallel_translations"`
+	LastReadBook            *string `json:"last_read_book"`
+	LastReadChapter         uint    `json:"last_read_chapter"`
+	FontSize                int     `json:"font_size"`
+	FontFamily              uint    `json:"font_family"`
+	ReferenceAtBottom       bool    `json:"reference_at_bottom"`
+	UseAbbreviations        bool    `json:"use_abbreviations"`
+	CopyIncludesUrl         bool    `json:"copy_includes_url"`
+	MarkAsReadAutomatically bool    `json:"mark_as_read_automatically"`
 }
 
 type RefreshToken struct {

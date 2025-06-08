@@ -86,6 +86,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	name := c.FormValue("name")
 	username := c.FormValue("username")
 	photoUrl := c.FormValue("photourl")
+	bio := c.FormValue("bio")
 
 	if email != "" {
 		address, err := mail.ParseAddress(email)
@@ -103,6 +104,7 @@ func UpdateUser(c *fiber.Ctx) error {
 	if username != "" {
 		user.Username = username
 	}
+	user.Bio = bio
 	user.Trim()
 	result := appdata.DB.Save(&user)
 	if result.Error != nil {
@@ -289,6 +291,9 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	fontSizeString := c.FormValue("font_size")
 	fontFamilyString := c.FormValue("font_family")
 	referenceAtBottom := c.FormValue("reference_at_bottom")
+	useAbbreviations := c.FormValue("use_abbreviations")
+	copyIncludesUrl := c.FormValue("copy_includes_url")
+	markAsReadAutomatically := c.FormValue("mark_as_read_automatically")
 	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
 	fontFamily, _ := strconv.Atoi(fontFamilyString)
 	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
@@ -298,6 +303,21 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 		userPreferences.DarkMode = true
 	} else if darkModeString == "false" {
 		userPreferences.DarkMode = false
+	}
+	if useAbbreviations == "true" {
+		userPreferences.UseAbbreviations = true
+	} else if useAbbreviations == "false" {
+		userPreferences.UseAbbreviations = false
+	}
+	if copyIncludesUrl == "true" {
+		userPreferences.CopyIncludesUrl = true
+	} else if copyIncludesUrl == "false" {
+		userPreferences.CopyIncludesUrl = false
+	}
+	if markAsReadAutomatically == "true" {
+		userPreferences.MarkAsReadAutomatically = true
+	} else if markAsReadAutomatically == "false" {
+		userPreferences.MarkAsReadAutomatically = false
 	}
 	for _, t := range appdata.AvailableTranslations {
 		if t == translation {
