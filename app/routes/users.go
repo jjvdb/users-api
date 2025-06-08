@@ -289,7 +289,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	fontSizeString := c.FormValue("font_size")
 	fontFamilyString := c.FormValue("font_family")
 	referenceAtBottom := c.FormValue("reference_at_bottom")
-	fontSize, _ := strconv.Atoi(fontSizeString)
+	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
 	fontFamily, _ := strconv.Atoi(fontFamilyString)
 	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
 	chapter := uint(lastReadChapterInt)
@@ -324,7 +324,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	if theme != "" {
 		userPreferences.Theme = &theme
 	}
-	if fontSize != 0 {
+	if fontSizeError == nil {
 		userPreferences.FontSize = int(fontSize)
 	}
 	if fontFamily != 0 {
