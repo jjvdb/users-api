@@ -281,14 +281,14 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
 	userPreferences.UserID = user_id
 
-	darkModeString := c.FormValue("darkmode")
+	darkModeString := c.FormValue("dark_mode")
 	theme := c.FormValue("theme")
 	translation := c.FormValue("translation")
-	lastReadBook := c.FormValue("lastreadbook")
-	lastReadChapterString := c.FormValue("lastreadchapter")
-	fontSizeString := c.FormValue("fontsize")
-	fontFamilyString := c.FormValue("fontfamily")
-	referenceAtBottom := c.FormValue("referenceatbottom")
+	lastReadBook := c.FormValue("last_read_book")
+	lastReadChapterString := c.FormValue("last_read_chapter")
+	fontSizeString := c.FormValue("font_size")
+	fontFamilyString := c.FormValue("font_family")
+	referenceAtBottom := c.FormValue("reference_at_bottom")
 	fontSize, _ := strconv.Atoi(fontSizeString)
 	fontFamily, _ := strconv.Atoi(fontFamilyString)
 	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
@@ -299,14 +299,13 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	} else if darkModeString == "false" {
 		userPreferences.DarkMode = false
 	}
-
 	for _, t := range appdata.AvailableTranslations {
 		if t == translation {
 			userPreferences.Translation = &translation
 		}
 	}
-	if userPreferences.Translation != nil || *userPreferences.Translation != "" {
-		parallelTranslations := c.FormValue("paralleltranslations")
+	if userPreferences.Translation != nil && *userPreferences.Translation != "" {
+		parallelTranslations := c.FormValue("parallel_translations")
 		if parallelTranslations != "" {
 			userPreferences.ParallelTranslations = &parallelTranslations
 		}
@@ -325,7 +324,6 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	if theme != "" {
 		userPreferences.Theme = &theme
 	}
-
 	if fontSize != 0 {
 		userPreferences.FontSize = int(fontSize)
 	}
