@@ -2,7 +2,6 @@ package routes
 
 import (
 	"errors"
-	"strconv"
 	"users-api/app/appdata"
 	"users-api/app/models"
 	"users-api/app/utils"
@@ -12,34 +11,34 @@ import (
 )
 
 func MarkChapterAsRead(c *fiber.Ctx) error {
-	user_id := utils.GetUserFromJwt(c)
-	book := c.FormValue("book")
-	chapterStr := c.FormValue("chapter")
-	chapterInt, err := strconv.Atoi(chapterStr)
-	chapter := uint(chapterInt)
-	if err != nil {
+	userID := utils.GetUserFromJwt(c)
+
+	// Deserialize JSON body
+	var req struct {
+		Book    uint `json:"book"`
+		Chapter uint `json:"chapter"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid chapter value",
+			"error": "Invalid request body",
 		})
 	}
-	var bookStruct appdata.Book
-	for _, b := range appdata.Books {
-		if b.Book == book {
-			bookStruct = b
-			break
-		}
-	}
-	if bookStruct.Book != book {
+
+	if req.Book < 1 || req.Book > 66 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid bible book",
+			"error": "Invalid book",
 		})
 	}
-	if chapter > bookStruct.Chapters {
+
+	bookStruct := appdata.Books[req.Book]
+
+	if req.Chapter > bookStruct.Chapters {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid chapter number",
 		})
 	}
-	readHistory := models.ReadHistory{UserID: user_id, Book: book, Chapter: chapter}
+	readHistory := models.ReadHistory{UserID: userID, Book: req.Book, Chapter: req.Chapter}
 	result := appdata.DB.Create(&readHistory)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
@@ -60,17 +59,19 @@ func MarkChapterAsRead(c *fiber.Ctx) error {
 
 func MarkChapterAsUnread(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
-	book := c.FormValue("book")
-	chapterStr := c.FormValue("chapter")
-	chapterInt, err := strconv.Atoi(chapterStr)
-	chapter := uint(chapterInt)
-	if err != nil {
+	// Deserialize JSON body
+	var req struct {
+		Book    uint `json:"book"`
+		Chapter uint `json:"chapter"`
+	}
+
+	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid chapter value",
+			"error": "Invalid request body",
 		})
 	}
 	var readHistory models.ReadHistory
-	result := appdata.DB.Where("user_id = ? AND book = ? AND chapter = ?", user_id, book, chapter).First(&readHistory)
+	result := appdata.DB.Where("user_id = ? AND book = ? AND chapter = ?", user_id, req.Book, req.Chapter).First(&readHistory)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return c.JSON(fiber.Map{
