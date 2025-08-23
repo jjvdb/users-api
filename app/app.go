@@ -128,6 +128,8 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Post("/changepassword", routes.ChangePassword)
 	app.Fiber.Post("/markchapterasread", routes.MarkChapterAsRead)
 	app.Fiber.Delete("/markchapterasread", routes.MarkChapterAsUnread)
+	app.Fiber.Post("/markbookasread/:bookid", routes.MarkBookAsRead)
+	app.Fiber.Delete("/markbookasread/:bookid", routes.MarkBookAsUnread)
 	app.Fiber.Put("/userpreferences", routes.UpdateUserPreferences)
 	app.Fiber.Delete("/userpreferences", routes.DeleteUserPreferences)
 	app.Fiber.Post("/bookmark", routes.AddBookmark)
