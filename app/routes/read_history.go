@@ -154,3 +154,78 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 		"message": "Read history for book deleted",
 	})
 }
+
+func GetReadChaptersOfBook(c *fiber.Ctx) error {
+	userID := utils.GetUserFromJwt(c)
+
+	// Parse book ID from route param
+	bookIDStr := c.Params("bookid")
+	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
+	if err != nil || bookIDUint64 < 1 || bookIDUint64 > 66 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid book id",
+		})
+	}
+	bookID := uint(bookIDUint64)
+
+	// Query DB for read chapters
+	var histories []models.ReadHistory
+	if err := appdata.DB.
+		Where("user_id = ? AND book = ?", userID, bookID).
+		Find(&histories).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch read chapters",
+		})
+	}
+
+	// Collect chapters
+	readChapters := make([]uint, 0, len(histories))
+	for _, h := range histories {
+		readChapters = append(readChapters, h.Chapter)
+	}
+
+	// Return JSON
+	return c.JSON(fiber.Map{
+		"book_id":       bookID,
+		"read_chapters": readChapters,
+	})
+}
+
+func GetCompletedBooks(c *fiber.Ctx) error {
+	userID := utils.GetUserFromJwt(c)
+
+	// Fetch all read history for the user
+	var histories []models.ReadHistory
+	if err := appdata.DB.
+		Where("user_id = ?", userID).
+		Find(&histories).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to fetch read history",
+		})
+	}
+
+	// Count chapters read per book
+	readMap := make(map[uint]map[uint]bool) // bookID -> set of chapters
+	for _, h := range histories {
+		if _, ok := readMap[h.Book]; !ok {
+			readMap[h.Book] = make(map[uint]bool)
+		}
+		readMap[h.Book][h.Chapter] = true
+	}
+
+	// Find completed books
+	completed := make([]uint, 0)
+	for bookID, chaptersRead := range readMap {
+		// Guard: skip invalid book IDs
+		if int(bookID) < len(appdata.Books) {
+			totalChapters := appdata.Books[bookID].Chapters
+			if uint(len(chaptersRead)) == totalChapters {
+				completed = append(completed, bookID)
+			}
+		}
+	}
+
+	return c.JSON(fiber.Map{
+		"completed_books": completed,
+	})
+}
