@@ -39,7 +39,6 @@ type UserPreference struct {
 	FontSize                int     `json:"font_size"`
 	FontFamily              uint    `json:"font_family"`
 	ReferenceAtBottom       bool    `json:"reference_at_bottom"`
-	UseAbbreviations        bool    `json:"use_abbreviations"`
 	CopyIncludesUrl         bool    `json:"copy_includes_url"`
 	MarkAsReadAutomatically bool    `json:"mark_as_read_automatically"`
 }

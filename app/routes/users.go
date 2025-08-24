@@ -291,7 +291,6 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	fontSizeString := c.FormValue("font_size")
 	fontFamilyString := c.FormValue("font_family")
 	referenceAtBottom := c.FormValue("reference_at_bottom")
-	useAbbreviations := c.FormValue("use_abbreviations")
 	copyIncludesUrl := c.FormValue("copy_includes_url")
 	markAsReadAutomatically := c.FormValue("mark_as_read_automatically")
 	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
@@ -303,11 +302,6 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 		userPreferences.DarkMode = true
 	} else if darkModeString == "false" {
 		userPreferences.DarkMode = false
-	}
-	if useAbbreviations == "true" {
-		userPreferences.UseAbbreviations = true
-	} else if useAbbreviations == "false" {
-		userPreferences.UseAbbreviations = false
 	}
 	if copyIncludesUrl == "true" {
 		userPreferences.CopyIncludesUrl = true
