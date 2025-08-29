@@ -91,6 +91,15 @@ type Bookmark struct {
 	CreatedAt     time.Time `json:"created_at"`
 }
 
+type ParallelTranslations struct {
+	ID           uint
+	UserID       uint      `json:"user_id" gorm:"uniqueIndex:uniquePT"`
+	User         User      `json:"-" gorm:"constraint:OnDelete:CASCADE;"`
+	Translation1 string    `json:"translation_1" gorm:"uniqueIndex:uniquePT"`
+	Translation2 string    `json:"translation_2" gorm:"uniqueIndex:uniquePT"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 type Note struct {
 	ID            uint      `json:"id"`
 	UserID        uint      `json:"user_id"`
@@ -126,4 +135,9 @@ func (req *SignupRequest) Trim() {
 	req.Name = strings.TrimSpace(req.Name)
 	req.Username = strings.TrimSpace(req.Username)
 	req.Email = strings.TrimSpace(req.Email)
+}
+
+type ParallelTranslationResponse struct {
+	SourceTranslation    string   `json:"source_translation"`
+	ParallelTranslations []string `json:"parallel_translations"`
 }

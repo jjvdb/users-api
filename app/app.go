@@ -140,6 +140,11 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Delete("/note/:noteid", routes.DeleteNote)
 	app.Fiber.Put("/note/:noteid", routes.UpdateNote)
 	app.Fiber.Get("/note", routes.GetNotesOfUser)
+	app.Fiber.Post("/paralleltranslations", routes.SetParallelTranslations)
+	app.Fiber.Delete("/paralleltranslations", routes.DeleteAllParallelTranslations)
+	app.Fiber.Delete("/paralleltranslations/:translation", routes.DeleteParallelTranslations)
+	app.Fiber.Get("/paralleltranslations", routes.GetAllParallelTranslations)
+	app.Fiber.Get("/paralleltranslations/:translation", routes.GetParallelTranslations)
 }
 
 func (app *App) Start() {
