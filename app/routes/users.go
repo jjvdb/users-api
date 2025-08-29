@@ -298,19 +298,22 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
 	chapter := uint(lastReadChapterInt)
 
-	if darkModeString == "true" {
+	switch darkModeString {
+	case "true":
 		userPreferences.DarkMode = true
-	} else if darkModeString == "false" {
+	case "false":
 		userPreferences.DarkMode = false
 	}
-	if copyIncludesUrl == "true" {
+	switch copyIncludesUrl {
+	case "true":
 		userPreferences.CopyIncludesUrl = true
-	} else if copyIncludesUrl == "false" {
+	case "false":
 		userPreferences.CopyIncludesUrl = false
 	}
-	if markAsReadAutomatically == "true" {
+	switch markAsReadAutomatically {
+	case "true":
 		userPreferences.MarkAsReadAutomatically = true
-	} else if markAsReadAutomatically == "false" {
+	case "false":
 		userPreferences.MarkAsReadAutomatically = false
 	}
 	for _, t := range appdata.AvailableTranslations {
@@ -345,9 +348,10 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 		userPreferences.FontFamily = uint(fontFamily)
 	}
 	if referenceAtBottom != "" {
-		if referenceAtBottom == "true" {
+		switch referenceAtBottom {
+		case "true":
 			userPreferences.ReferenceAtBottom = true
-		} else if referenceAtBottom == "false" {
+		case "false":
 			userPreferences.ReferenceAtBottom = false
 		}
 	}
