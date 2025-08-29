@@ -286,8 +286,6 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	darkModeString := c.FormValue("dark_mode")
 	theme := c.FormValue("theme")
 	translation := c.FormValue("translation")
-	lastReadBook := c.FormValue("last_read_book")
-	lastReadChapterString := c.FormValue("last_read_chapter")
 	fontSizeString := c.FormValue("font_size")
 	fontFamilyString := c.FormValue("font_family")
 	referenceAtBottom := c.FormValue("reference_at_bottom")
@@ -295,8 +293,6 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	markAsReadAutomatically := c.FormValue("mark_as_read_automatically")
 	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
 	fontFamily, _ := strconv.Atoi(fontFamilyString)
-	lastReadChapterInt, _ := strconv.Atoi(lastReadChapterString)
-	chapter := uint(lastReadChapterInt)
 
 	switch darkModeString {
 	case "true":
@@ -318,23 +314,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	}
 	for _, t := range appdata.AvailableTranslations {
 		if t == translation {
-			userPreferences.Translation = &translation
-		}
-	}
-	if userPreferences.Translation != nil && *userPreferences.Translation != "" {
-		parallelTranslations := c.FormValue("parallel_translations")
-		if parallelTranslations != "" {
-			userPreferences.ParallelTranslations = &parallelTranslations
-		}
-	}
-	for _, b := range appdata.Books {
-		if b.Book == lastReadBook {
-			userPreferences.LastReadBook = &lastReadBook
-			if chapter != 0 {
-				if chapter <= b.Chapters {
-					userPreferences.LastReadChapter = chapter
-				}
-			}
+			userPreferences.PreferredTranslation = &translation
 		}
 	}
 

@@ -32,10 +32,7 @@ type UserPreference struct {
 	UserID                  uint    `json:"user_id" gorm:"unique"`
 	DarkMode                bool    `json:"dark_mode"`
 	Theme                   *string `json:"theme"`
-	Translation             *string `json:"translation"`
-	ParallelTranslations    *string `json:"parallel_translations"`
-	LastReadBook            *string `json:"last_read_book"`
-	LastReadChapter         uint    `json:"last_read_chapter"`
+	PreferredTranslation    *string `json:"preferred_translation"`
 	FontSize                int     `json:"font_size"`
 	FontFamily              uint    `json:"font_family"`
 	ReferenceAtBottom       bool    `json:"reference_at_bottom"`
