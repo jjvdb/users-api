@@ -91,6 +91,7 @@ func (app *App) InitializeDatabase() {
 		&models.UserPreference{},
 		&models.Bookmark{},
 		&models.Note{},
+		&models.ParallelTranslations{},
 	}
 	for _, model := range modelsToMigrate {
 		if err := appdata.DB.AutoMigrate(model); err != nil {
