@@ -30,17 +30,18 @@ func SetParallelTranslations(c *fiber.Ctx) error {
 
 	// build slice of records
 	pts := make([]models.ParallelTranslations, 0, len(req.ParallelTranslations))
+	sourceUpper := strings.ToUpper(req.SourceTranslation)
+
 	for _, p := range req.ParallelTranslations {
-		if p == req.SourceTranslation {
-			continue
+		if strings.ToUpper(p) == sourceUpper {
+			continue // skip if identical ignoring case
 		}
 		pts = append(pts, models.ParallelTranslations{
 			UserID:       userID, // set from context
-			Translation1: strings.ToUpper(req.SourceTranslation),
+			Translation1: sourceUpper,
 			Translation2: strings.ToUpper(p),
 		})
 	}
-
 	// bulk insert
 	if err := appdata.DB.Create(&pts).Error; err != nil {
 		return err
