@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"strings"
+
 	"users-api/app/appdata"
 	"users-api/app/models"
 	"users-api/app/utils"
@@ -29,10 +31,13 @@ func SetParallelTranslations(c *fiber.Ctx) error {
 	// build slice of records
 	pts := make([]models.ParallelTranslations, 0, len(req.ParallelTranslations))
 	for _, p := range req.ParallelTranslations {
+		if p == req.SourceTranslation {
+			continue
+		}
 		pts = append(pts, models.ParallelTranslations{
 			UserID:       userID, // set from context
-			Translation1: req.SourceTranslation,
-			Translation2: p,
+			Translation1: strings.ToUpper(req.SourceTranslation),
+			Translation2: strings.ToUpper(p),
 		})
 	}
 
