@@ -38,6 +38,7 @@ type UserPreference struct {
 	ReferenceAtBottom       bool    `json:"reference_at_bottom"`
 	CopyIncludesUrl         bool    `json:"copy_includes_url"`
 	MarkAsReadAutomatically bool    `json:"mark_as_read_automatically"`
+	UseAbbreviationsForNav  bool    `json:"use_abrbeviations_for_nav"`
 }
 
 type RefreshToken struct {

@@ -291,6 +291,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	referenceAtBottom := c.FormValue("reference_at_bottom")
 	copyIncludesUrl := c.FormValue("copy_includes_url")
 	markAsReadAutomatically := c.FormValue("mark_as_read_automatically")
+	useAbbreviationsForNav := c.FormValue("use_abbreviations_for_nav")
 	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
 	fontFamily, _ := strconv.Atoi(fontFamilyString)
 
@@ -311,6 +312,12 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 		userPreferences.MarkAsReadAutomatically = true
 	case "false":
 		userPreferences.MarkAsReadAutomatically = false
+	}
+	switch useAbbreviationsForNav {
+	case "true":
+		userPreferences.UseAbbreviationsForNav = true
+	case "false":
+		userPreferences.UseAbbreviationsForNav = false
 	}
 	for _, t := range appdata.AvailableTranslations {
 		if t == translation {
@@ -346,5 +353,29 @@ func DeleteUserPreferences(c *fiber.Ctx) error {
 	appdata.DB.Delete(&userPreferences)
 	return c.JSON(fiber.Map{
 		"message": "User preferences deleted",
+	})
+}
+
+func UseAbbreviationsForNav(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreference
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	userPreferences.UserID = user_id
+	userPreferences.UseAbbreviationsForNav = true
+	appdata.DB.Save(&userPreferences)
+	return c.JSON(fiber.Map{
+		"message": "Success",
+	})
+}
+
+func DontUseAbbreviationsForNav(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreference
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	userPreferences.UserID = user_id
+	userPreferences.UseAbbreviationsForNav = false
+	appdata.DB.Save(&userPreferences)
+	return c.JSON(fiber.Map{
+		"message": "Success",
 	})
 }

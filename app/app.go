@@ -146,6 +146,8 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Delete("/paralleltranslations/:translation", routes.DeleteParallelTranslations)
 	app.Fiber.Get("/paralleltranslations", routes.GetAllParallelTranslations)
 	app.Fiber.Get("/paralleltranslations/:translation", routes.GetParallelTranslations)
+	app.Fiber.Post("/abbreviationsfornav", routes.UseAbbreviationsForNav)
+	app.Fiber.Delete("/abbreviationsfornav", routes.DontUseAbbreviationsForNav)
 }
 
 func (app *App) Start() {
