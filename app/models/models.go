@@ -35,6 +35,7 @@ type UserPreference struct {
 	PreferredTranslation    *string `json:"preferred_translation"`
 	FontSize                int     `json:"font_size"`
 	FontFamily              uint    `json:"font_family"`
+	MarginSize              int     `json:"margin_size"`
 	ReferenceAtBottom       bool    `json:"reference_at_bottom"`
 	CopyIncludesUrl         bool    `json:"copy_includes_url"`
 	MarkAsReadAutomatically bool    `json:"mark_as_read_automatically"`
