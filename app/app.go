@@ -150,6 +150,8 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Delete("/abbreviationsfornav", routes.DontUseAbbreviationsForNav)
 	app.Fiber.Post("/increasefontsize", routes.IncreaseFontSize)
 	app.Fiber.Post("/decreasefontsize", routes.DecreaseFontSize)
+	app.Fiber.Post("/increasemarginsize", routes.IncreaseMarginSize)
+	app.Fiber.Post("/decreasemarginsize", routes.DecreaseMarginSize)
 }
 
 func (app *App) Start() {
