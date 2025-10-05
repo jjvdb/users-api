@@ -385,3 +385,27 @@ func DontUseAbbreviationsForNav(c *fiber.Ctx) error {
 		"message": "Success",
 	})
 }
+
+func IncreaseFontSize(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreference
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	userPreferences.UserID = user_id
+	userPreferences.FontSize += 1
+	appdata.DB.Save(&userPreferences)
+	return c.JSON(fiber.Map{
+		"message": "Success",
+	})
+}
+
+func DecreaseFontSize(c *fiber.Ctx) error {
+	user_id := utils.GetUserFromJwt(c)
+	var userPreferences models.UserPreference
+	appdata.DB.Where("user_id = ?", user_id).First(&userPreferences)
+	userPreferences.UserID = user_id
+	userPreferences.FontSize -= 1
+	appdata.DB.Save(&userPreferences)
+	return c.JSON(fiber.Map{
+		"message": "Success",
+	})
+}

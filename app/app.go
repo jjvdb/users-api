@@ -148,6 +148,8 @@ func (app *App) SetupRoutes() {
 	app.Fiber.Get("/paralleltranslations/:translation", routes.GetParallelTranslations)
 	app.Fiber.Post("/abbreviationsfornav", routes.UseAbbreviationsForNav)
 	app.Fiber.Delete("/abbreviationsfornav", routes.DontUseAbbreviationsForNav)
+	app.Fiber.Post("/increasefontsize", routes.IncreaseFontSize)
+	app.Fiber.Post("/decreasefontsize", routes.DecreaseFontSize)
 }
 
 func (app *App) Start() {
