@@ -295,7 +295,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	useAbbreviationsForNav := c.FormValue("use_abbreviations_for_nav")
 	fontSize, fontSizeError := strconv.Atoi(fontSizeString)
 	marginSize, marginSizeError := strconv.Atoi(marginSizeString)
-	fontFamily, _ := strconv.Atoi(fontFamilyString)
+	fontFamily, fontFamilyError := strconv.Atoi(fontFamilyString)
 
 	switch darkModeString {
 	case "true":
@@ -336,7 +336,7 @@ func UpdateUserPreferences(c *fiber.Ctx) error {
 	if marginSizeError == nil {
 		userPreferences.MarginSize = int(marginSize)
 	}
-	if fontFamily != 0 {
+	if fontFamilyError == nil {
 		userPreferences.FontFamily = uint(fontFamily)
 	}
 	if referenceAtBottom != "" {
