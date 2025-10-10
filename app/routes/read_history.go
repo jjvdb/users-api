@@ -177,7 +177,7 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 	bookIDStr := c.Params("bookid")
 	var bookIDUint64 uint64
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
-	if err != nil {
+	if err == nil {
 		if bookIDUint64 > 66 || bookIDUint64 < 1 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid book id",
@@ -246,7 +246,7 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 	bookIDStr := c.Params("bookid")
 	var bookIDUint64 uint64
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
-	if err != nil {
+	if err == nil {
 		if bookIDUint64 > 66 || bookIDUint64 < 1 {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid book id",
@@ -293,10 +293,33 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
-	// Parse book ID from route param
 	bookIDStr := c.Params("bookid")
+	var bookIDUint64 uint64
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
-	if err != nil || bookIDUint64 < 1 || bookIDUint64 > 66 {
+	if err == nil {
+		if bookIDUint64 > 66 || bookIDUint64 < 1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid book id",
+			})
+		}
+	} else {
+		for i := range appdata.Books {
+			if strings.ToUpper(bookIDStr) == appdata.Books[i].Abbreviation {
+				bookIDUint64 = uint64(i + 1)
+				break
+			}
+		}
+		if bookIDUint64 == 0 {
+			for i := range appdata.Books {
+				if strings.EqualFold(strings.ReplaceAll(bookIDStr, "-", " "), appdata.Books[i].Book) {
+					bookIDUint64 = uint64(i + 1)
+					break
+				}
+			}
+		}
+	}
+
+	if bookIDUint64 == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid book id",
 		})
