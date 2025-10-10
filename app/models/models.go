@@ -80,7 +80,6 @@ type ReadHistory struct {
 	Book      uint      `json:"book" gorm:"uniqueIndex:unique_read_history"`
 	Chapter   uint      `json:"chapter" gorm:"uniqueIndex:unique_read_history"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type Bookmark struct {
@@ -142,4 +141,19 @@ func (req *SignupRequest) Trim() {
 type ParallelTranslationResponse struct {
 	SourceTranslation    string   `json:"source_translation"`
 	ParallelTranslations []string `json:"parallel_translations"`
+}
+
+type StatusType string
+
+const (
+	StatusComplete   StatusType = "complete"
+	StatusPartial    StatusType = "partial"
+	StatusNotStarted StatusType = "not_started"
+)
+
+// ReadBook represents a book reading progress
+type ReadBook struct {
+	Book         string     `json:"book"`
+	Abbreviation string     `json:"abbreviation"`
+	Status       StatusType `json:"status"`
 }
