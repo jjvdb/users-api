@@ -125,6 +125,15 @@ func (req *LoginRequest) Trim() {
 	req.EmailOrUsername = strings.TrimSpace(req.EmailOrUsername)
 }
 
+type LoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
 type SignupRequest struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`

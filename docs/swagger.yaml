@@ -1,0 +1,170 @@
+basePath: /users
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  models.LoginRequest:
+    properties:
+      device:
+        type: string
+      emailorusername:
+        type: string
+      location:
+        type: string
+      password:
+        type: string
+      remember:
+        type: boolean
+    type: object
+  models.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+host: api.scripture.pp.ua
+info:
+  contact: {}
+  description: Fiber API with Swagger
+  title: Scripture users-api
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with email and password and returns a JWT
+        access token and a refresh token.
+      parameters:
+      - description: User login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Login a user
+      tags:
+      - auth
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: Logs out the user from all devices by invalidating all refresh
+        tokens associated with their account.
+      parameters:
+      - description: Refresh token
+        in: header
+        name: Refresh
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout confirmation message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request or token issues
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout user from current device
+      tags:
+      - auth
+  /logout/all:
+    post:
+      consumes:
+      - application/json
+      description: Logs out the user from all devices by invalidating all provided
+        refresh tokens.
+      parameters:
+      - description: Bearer JWT token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout confirmation message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized, invalid or missing JWT
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout user from all devices
+      tags:
+      - auth
+  /refresh:
+    post:
+      consumes:
+      - application/json
+      description: Validates the refresh token and returns a new access and refresh
+        token pair.
+      parameters:
+      - description: Refresh token
+        in: header
+        name: Refresh
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: access_token and refresh_token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request or token issues
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh JWT token
+      tags:
+      - auth
+swagger: "2.0"

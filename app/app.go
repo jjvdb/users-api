@@ -7,11 +7,13 @@ import (
 	"users-api/app/appdata"
 	"users-api/app/models"
 	"users-api/app/routes"
+	_ "users-api/docs"
 
 	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gofiber/swagger"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -108,6 +110,7 @@ func (app *App) SetupRoutes() {
 		}))
 
 	}
+	app.Fiber.Get("/swagger/*", swagger.HandlerDefault)
 	app.Fiber.Get("/", routes.Home)
 	app.Fiber.Get("/checkusernameavailability", routes.CheckIfUsernameAvailable)
 	app.Fiber.Post("/users", routes.CreateUser)

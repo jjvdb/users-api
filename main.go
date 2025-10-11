@@ -1,3 +1,9 @@
+// @title           Scripture users-api
+// @version         1.0
+// @description     Fiber API with Swagger
+// @host            api.scripture.pp.ua
+// @BasePath        /users
+
 package main
 
 import (
