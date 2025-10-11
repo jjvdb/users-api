@@ -66,9 +66,11 @@ func LoginUser(c *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Param        Refresh  header  string  true  "Refresh token"
-// @Success      200  {object}  models.LoginResponse
-// @Failure      401  {object}  models.ErrorResponse
+// @Success      200  {object}  map[string]string  "access_token and refresh_token"
+// @Failure      400  {object}  map[string]string  "Bad request or token issues"
+// @Failure      500  {object}  map[string]string  "Internal server error"
 // @Router       /refresh [post]
+
 func RefreshToken(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
 	if token == "" {
@@ -105,11 +107,12 @@ func RefreshToken(c *fiber.Ctx) error {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Security     BearerAuth
 // @Param        Authorization  header  string  true  "Bearer JWT token"
-// @Success      200  {object}  models.GenericMessage
-// @Failure      401  {object}  models.ErrorResponse
+// @Success      200  {object}  map[string]string  "Logout confirmation message"
+// @Failure      401  {object}  map[string]string  "Unauthorized, invalid or missing JWT"
+// @Failure      500  {object}  map[string]string  "Internal server error"
 // @Router       /logout/all [post]
+
 func LogoutAll(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	appdata.DB.Where("user_id = ?", user_id).Delete(&models.RefreshToken{})
@@ -123,9 +126,11 @@ func LogoutAll(c *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Param        Refresh  header  string  true  "Refresh token"
-// @Success      200  {object}  models.GenericMessage
-// @Failure      400  {object}  models.ErrorResponse
+// @Success      200  {object}  map[string]string  "Logout confirmation message"
+// @Failure      400  {object}  map[string]string  "Bad request or token issues"
+// @Failure      500  {object}  map[string]string  "Internal server error"
 // @Router       /logout [post]
+
 func Logout(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
 	if token == "" {
