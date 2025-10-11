@@ -110,7 +110,9 @@ func (app *App) SetupRoutes() {
 		}))
 
 	}
-	app.Fiber.Get("/swagger/*", swagger.HandlerDefault)
+	app.Fiber.Get("/swagger/*", swagger.New(swagger.Config{
+    URL: "/users/swagger/doc.json",
+}))
 	app.Fiber.Get("/", routes.Home)
 	app.Fiber.Get("/checkusernameavailability", routes.CheckIfUsernameAvailable)
 	app.Fiber.Post("/users", routes.CreateUser)
