@@ -12,6 +12,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// LoginUser godoc
+// @Summary      Login a user
+// @Description  Authenticates a user with email and password and returns a JWT access token and a refresh token.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        credentials  body  models.LoginRequest  true  "User login credentials"
+// @Success      200  {object}  models.LoginResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router       /login [post]
+
 func LoginUser(c *fiber.Ctx) error {
 	var req models.LoginRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -54,6 +65,18 @@ func LoginUser(c *fiber.Ctx) error {
 		"refresh_token": refreshToken,
 	})
 }
+
+// RefreshToken godoc
+// @Summary      Refresh JWT token
+// @Description  Validates the refresh token and returns a new access and refresh token pair.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        Refresh  header  string  true  "Refresh token"
+// @Success      200  {object}  map[string]string  "access_token and refresh_token"
+// @Failure      400  {object}  map[string]string  "Bad request or token issues"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /refresh [post]
 
 func RefreshToken(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
@@ -98,11 +121,35 @@ func RefreshToken(c *fiber.Ctx) error {
 	})
 }
 
+// LogoutAll godoc
+// @Summary      Logout user from all devices
+// @Description  Logs out the user from all devices by invalidating all provided refresh tokens.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        Authorization  header  string  true  "Bearer JWT token"
+// @Success      200  {object}  map[string]string  "Logout confirmation message"
+// @Failure      401  {object}  map[string]string  "Unauthorized, invalid or missing JWT"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /logout/all [post]
+
 func LogoutAll(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	appdata.DB.Where("user_id = ?", user_id).Delete(&models.RefreshToken{})
 	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices completely.", appdata.JwtExpiryMinutes)})
 }
+
+// Logout godoc
+// @Summary      Logout user from current device
+// @Description  Logs out the user from all devices by invalidating all refresh tokens associated with their account.
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        Refresh  header  string  true  "Refresh token"
+// @Success      200  {object}  map[string]string  "Logout confirmation message"
+// @Failure      400  {object}  map[string]string  "Bad request or token issues"
+// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Router       /logout [post]
 
 func Logout(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
