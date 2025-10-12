@@ -62,7 +62,8 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 	email := address.Address
 	hashedPassword := utils.HashPassword(req.Password)
-	user := models.User{Email: email, Username: req.Username, Password: hashedPassword, Name: req.Name}
+	photoUrl := utils.GetAvatarURL(email, req.Name)
+	user := models.User{Email: email, Username: req.Username, Password: hashedPassword, Name: req.Name, PhotoUrl: photoUrl}
 	result := appdata.DB.Create(&user)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
@@ -99,7 +100,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		user.Name = name
 	}
 	if photoUrl != "" {
-		user.PhotoUrl = &photoUrl
+		user.PhotoUrl = photoUrl
 	}
 	if username != "" {
 		user.Username = username

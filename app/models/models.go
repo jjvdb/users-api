@@ -11,7 +11,7 @@ type User struct {
 	Username      string         `json:"username" gorm:"unique;not null"`
 	Password      string         `json:"-" gorm:"not null"` // This field will be omitted from the JSON output
 	Name          string         `json:"name"`
-	PhotoUrl      *string        `json:"photo_url"`
+	PhotoUrl      string         `json:"photo_url"`
 	IsActivated   bool           `json:"is_activated"`
 	Bio           string         `json:"bio"`
 	CreatedAt     time.Time      `json:"created_at"`
