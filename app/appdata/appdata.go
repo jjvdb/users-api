@@ -29,7 +29,7 @@ type Book struct {
 	Verses       uint
 }
 
-var AvailableTranslations = []string{"TOVBSI", "KJV", "MSLVP", "ASV", "WEB", "WEBU"}
+var AvailableTranslations = []string{"TOVBSI", "KJV", "MSLVP", "ASV", "WEB", "WEBU", "GOVBSI", "OOVBSI"}
 
 var Books = []Book{
 	{
