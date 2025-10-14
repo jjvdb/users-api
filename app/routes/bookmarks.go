@@ -9,6 +9,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// AddBookmark godoc
+// @Summary      Add a bookmark.
+// @Description  Marks a specific scripture reference for the logged in user.
+// @Tags         bookmarks
+// @Accept       application/x-www-form-urlencoded
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        book  formData string true "Book name, for example 'Genesis' or 'John'" example(John)
+// @Param        chapter  formData int true "Chapter number (1..150)" example(15)
+// @Param        verse  formData int true "Verse number (1..176)" example(5)
+// @Success      200  {object}  models.GenericMessage "Bookmark created confirmation"
+// @Failure      400  {object}  models.ErrorResponse "Invalid input or book not valid"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /bookmark [post]
+
 func AddBookmark(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	book := c.FormValue("book")
@@ -44,6 +61,23 @@ func AddBookmark(c *fiber.Ctx) error {
 		"message": "Created bookmark",
 	})
 }
+
+// DeleteBookmark godoc
+// @Summary      Delete a bookmark.
+// @Description  Removes an existing bookmark.
+// @Tags         bookmarks
+// @Accept       application/x-www-form-urlencoded
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        book  formData string true "Book name, for example 'Genesis' or 'John'" example(John)
+// @Param        chapter  formData int true "Chapter number (1..150)" example(15)
+// @Param        verse  formData int true "Verse number (1..176)" example(5)
+// @Success      200  {object}  models.GenericMessage "Bookmark removed confirmation"
+// @Failure      400  {object}  models.ErrorResponse "Invalid input or book not valid"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /bookmark [delete]
 
 func DeleteBookmark(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)

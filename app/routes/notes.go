@@ -9,6 +9,24 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// CreateNote godoc
+// @Summary      Create a note
+// @Description  Notate a specific scripture reference for the logged in user.
+// @Tags         notes
+// @Accept       application/x-www-form-urlencoded
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        book  formData string true "Book name, for example 'Genesis' or 'John'" example(John)
+// @Param        chapter  formData int true "Chapter number (1..150)" example(15)
+// @Param        verse  formData int true "Verse number (1..176)" example(2)
+// @Param        note     formData string true "Note text" example(STRONGS G142: Airo = lifts up. )
+// @Success      200  {object}  models.GenericMessage "Note created confirmation"
+// @Failure      400  {object}  models.ErrorResponse "Invalid input or book not valid"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /note [post]
+
 func CreateNote(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	book := c.FormValue("book")
@@ -49,6 +67,20 @@ func CreateNote(c *fiber.Ctx) error {
 	return c.JSON(note)
 }
 
+// DeleteNote godoc
+// @Summary      Delete a note
+// @Description  Removes an existing note for the logged in user.
+// @Tags         notes
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        noteid path int true "Unique note identifier"
+// @Success      200  {object}  models.GenericMessage "Note removed confirmation"
+// @Failure      400  {object}  models.ErrorResponse "Invalid noteId"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /note/{noteId} [delete]
+
 func DeleteNote(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	noteIdString := c.Params("noteid")
@@ -71,13 +103,29 @@ func DeleteNote(c *fiber.Ctx) error {
 	})
 }
 
+// UpdateNote godoc
+// @Summary      Update a note
+// @Description  Updates an existing note for the logged in user.
+// @Tags         notes
+// @Accept       application/x-www-form-urlencoded
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        noteid path int true "Unique note identifier"
+// @Param        note  formData string true "Updated note text" example("Every branch in me that beareth not fruit he lifts up (airo).")
+// @Success      200  {object}  models.GenericMessage "Note updated confirmation"
+// @Failure      400  {object}  models.ErrorResponse "Invalid noteId"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /note/{noteId} [patch]
+
 func UpdateNote(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	noteIdString := c.Params("noteid")
 	noteId, err := strconv.Atoi(noteIdString)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Wrong note id",
+			"error": "Wrong noteId",
 		})
 	}
 	var note models.Note
@@ -94,6 +142,23 @@ func UpdateNote(c *fiber.Ctx) error {
 	}
 	return c.JSON(note)
 }
+
+// GetNotesOfUser godoc
+// @Summary      Retrieve all notes
+// @Description  Retrieves all existing notes for the logged in user. Optional filters include book name, abbreviation, and chapter number.
+// @Tags         notes
+// @Produce      json
+// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
+// @Param        book query string false "Book name, for example 'Genesis' or 'John'" example(John)
+// @Param        abbreviation query string false "Book abbreviation, for example 'Jn' or 'Gen'" example(Jn)
+// @Param        chapter query int false "Chapter number (1..150)" example(3)
+// @Success      200  {object}  models.Note "List of user notes"
+// @Failure      400  {object}  models.ErrorResponse "Invalid query parameter"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /note [get]
+
 
 func GetNotesOfUser(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
