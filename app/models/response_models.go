@@ -27,6 +27,10 @@ func NewInternalError() ErrorResponse {
 	return ErrorResponse{Error: "Something went wrong, try again later."}
 }
 
+func NewInvalidRequestBodyError() ErrorResponse {
+	return ErrorResponse{Error: "Invalid request body."}
+}
+
 type SignupRequest struct {
 	Name     string `json:"name"`
 	Username string `json:"username"`
@@ -62,4 +66,32 @@ type ReadBook struct {
 
 type GenericMessage struct {
 	Message string `json:"message"`
+}
+
+type BibleChapter struct {
+	BookID       uint   `json:"book_id"`
+	Book         string `json:"book"`
+	Abbreviation string `json:"abbreviation"`
+	Chapter      uint   `json:"chapter"`
+}
+
+type MarkChapterAsReadResponse struct {
+	Book         string `json:"book"`
+	Abbreviation string `json:"abbreviation"`
+	Chapter      uint   `json:"chapter"`
+	Message      string `json:"message"`
+}
+
+type MarkBookReadResponse struct {
+	Message      string `json:"message"`
+	Book         string `json:"book"`
+	Abbreviation string `json:"abbreviation"`
+	Count        int    `json:"count"`
+}
+
+type BookReadChaptersResponse struct {
+	BookID       uint   `json:"book_id"`
+	Book         string `json:"book"`
+	Abbreviation string `json:"abbreviation"`
+	ReadChapters []uint `json:"read_chapters"`
 }

@@ -1,5 +1,29 @@
 basePath: /users
 definitions:
+  models.BibleChapter:
+    properties:
+      abbreviation:
+        type: string
+      book:
+        type: string
+      book_id:
+        type: integer
+      chapter:
+        type: integer
+    type: object
+  models.BookReadChaptersResponse:
+    properties:
+      abbreviation:
+        type: string
+      book:
+        type: string
+      book_id:
+        type: integer
+      read_chapters:
+        items:
+          type: integer
+        type: array
+    type: object
   models.ErrorResponse:
     properties:
       error:
@@ -30,6 +54,47 @@ definitions:
       refresh_token:
         type: string
     type: object
+  models.MarkBookReadResponse:
+    properties:
+      abbreviation:
+        type: string
+      book:
+        type: string
+      count:
+        type: integer
+      message:
+        type: string
+    type: object
+  models.MarkChapterAsReadResponse:
+    properties:
+      abbreviation:
+        type: string
+      book:
+        type: string
+      chapter:
+        type: integer
+      message:
+        type: string
+    type: object
+  models.ReadBook:
+    properties:
+      abbreviation:
+        type: string
+      book:
+        type: string
+      status:
+        $ref: '#/definitions/models.StatusType'
+    type: object
+  models.StatusType:
+    enum:
+    - complete
+    - partial
+    - not_started
+    type: string
+    x-enum-varnames:
+    - StatusComplete
+    - StatusPartial
+    - StatusNotStarted
 host: api.scripture.pp.ua
 info:
   contact: {}
@@ -118,6 +183,168 @@ paths:
       summary: Logout user from all devices
       tags:
       - auth
+  /markbookasread/{bookid}:
+    delete:
+      consumes:
+      - application/json
+      description: Mark a book of the Bible as unread
+      parameters:
+      - description: ID of the book, can be the name of the book, abbreviation or
+          the number (1-66)
+        in: path
+        name: bookid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MarkBookReadResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark a whole book unread
+      tags:
+      - read_history
+    post:
+      consumes:
+      - application/json
+      description: Mark a book of the Bible as read
+      parameters:
+      - description: ID of the book, can be the name of the book, abbreviation or
+          the number (1-66)
+        in: path
+        name: bookid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MarkBookReadResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark a whole book read
+      tags:
+      - read_history
+  /markchapterasread:
+    delete:
+      consumes:
+      - application/json
+      description: Mark a chapter from the Bible as unread
+      parameters:
+      - description: Bible chapter to mark as unread
+        in: body
+        name: chapter
+        required: true
+        schema:
+          $ref: '#/definitions/models.BibleChapter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MarkChapterAsReadResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark a chapter as unread
+      tags:
+      - read_history
+    post:
+      consumes:
+      - application/json
+      description: Mark a chapter from the Bible as read
+      parameters:
+      - description: Bible chapter to mark as read
+        in: body
+        name: chapter
+        required: true
+        schema:
+          $ref: '#/definitions/models.BibleChapter'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MarkChapterAsReadResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Mark a chapter as read
+      tags:
+      - read_history
+  /readbooksstatus:
+    get:
+      consumes:
+      - application/json
+      description: Returns the read status for each book in the Bible (complete, partial
+        and not_started).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ReadBook'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get read progress of all Bible books
+      tags:
+      - read_history
+  /readchaptersofbook/{bookid}:
+    get:
+      consumes:
+      - application/json
+      description: Returns the list of chapters marked as read for the specified book.
+      parameters:
+      - description: ID of the book, can be the name of the book, abbreviation or
+          the number (1-66)
+        in: path
+        name: bookid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BookReadChaptersResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get read chapter numbers for a book
+      tags:
+      - read_history
   /refresh:
     post:
       consumes:

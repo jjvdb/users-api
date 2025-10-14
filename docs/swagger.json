@@ -130,6 +130,258 @@
                 }
             }
         },
+        "/markbookasread/{bookid}": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a book of the Bible as read",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Mark a whole book read",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the book, can be the name of the book, abbreviation or the number (1-66)",
+                        "name": "bookid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MarkBookReadResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a book of the Bible as unread",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Mark a whole book unread",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the book, can be the name of the book, abbreviation or the number (1-66)",
+                        "name": "bookid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MarkBookReadResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/markchapterasread": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a chapter from the Bible as read",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Mark a chapter as read",
+                "parameters": [
+                    {
+                        "description": "Bible chapter to mark as read",
+                        "name": "chapter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BibleChapter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MarkChapterAsReadResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Mark a chapter from the Bible as unread",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Mark a chapter as unread",
+                "parameters": [
+                    {
+                        "description": "Bible chapter to mark as unread",
+                        "name": "chapter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.BibleChapter"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MarkChapterAsReadResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/readbooksstatus": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the read status for each book in the Bible (complete, partial and not_started).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Get read progress of all Bible books",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.ReadBook"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/readchaptersofbook/{bookid}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the list of chapters marked as read for the specified book.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "read_history"
+                ],
+                "summary": "Get read chapter numbers for a book",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the book, can be the name of the book, abbreviation or the number (1-66)",
+                        "name": "bookid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BookReadChaptersResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/models.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/refresh": {
             "post": {
                 "description": "Validates the refresh token and returns a new access and refresh token pair.",
@@ -170,6 +422,43 @@
         }
     },
     "definitions": {
+        "models.BibleChapter": {
+            "type": "object",
+            "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
+                "book": {
+                    "type": "string"
+                },
+                "book_id": {
+                    "type": "integer"
+                },
+                "chapter": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.BookReadChaptersResponse": {
+            "type": "object",
+            "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
+                "book": {
+                    "type": "string"
+                },
+                "book_id": {
+                    "type": "integer"
+                },
+                "read_chapters": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "models.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -216,6 +505,67 @@
                     "type": "string"
                 }
             }
+        },
+        "models.MarkBookReadResponse": {
+            "type": "object",
+            "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
+                "book": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MarkChapterAsReadResponse": {
+            "type": "object",
+            "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
+                "book": {
+                    "type": "string"
+                },
+                "chapter": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ReadBook": {
+            "type": "object",
+            "properties": {
+                "abbreviation": {
+                    "type": "string"
+                },
+                "book": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.StatusType"
+                }
+            }
+        },
+        "models.StatusType": {
+            "type": "string",
+            "enum": [
+                "complete",
+                "partial",
+                "not_started"
+            ],
+            "x-enum-varnames": [
+                "StatusComplete",
+                "StatusPartial",
+                "StatusNotStarted"
+            ]
         }
     },
     "securityDefinitions": {

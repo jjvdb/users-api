@@ -12,21 +12,24 @@ import (
 	"gorm.io/gorm"
 )
 
+// MarkChapterAsRead godoc
+// @Summary      Mark a chapter as read
+// @Description  Mark a chapter from the Bible as read
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Param        chapter  body  models.BibleChapter  true  "Bible chapter to mark as read"
+// @Security     BearerAuth
+// @Success      200  {object}  models.MarkChapterAsReadResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router       /markchapterasread [post]
 func MarkChapterAsRead(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
 	// Deserialize JSON body
-	var req struct {
-		BookID       uint   `json:"book_id"`
-		Book         string `json:"book"`
-		Abbreviation string `json:"abbreviation"`
-		Chapter      uint   `json:"chapter"`
-	}
-
+	var req models.BibleChapter
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.NewInvalidRequestBodyError())
 	}
 
 	req.Abbreviation = strings.ToUpper(req.Abbreviation)
@@ -35,9 +38,7 @@ func MarkChapterAsRead(c *fiber.Ctx) error {
 
 	if req.BookID != 0 {
 		if req.BookID < 1 || req.BookID > 66 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid book",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book"})
 		}
 		bookNum = req.BookID
 
@@ -58,61 +59,56 @@ func MarkChapterAsRead(c *fiber.Ctx) error {
 	}
 
 	if bookNum == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid book",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book"})
 	}
 
 	bookStruct := appdata.Books[bookNum-1]
 
 	if bookStruct.Chapters == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid chapter",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid chapter"})
 	}
 
 	if req.Chapter > bookStruct.Chapters {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid chapter number",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid chapter number"})
 	}
 	readHistory := models.ReadHistory{UserID: userID, Book: bookNum, Chapter: req.Chapter}
 	result := appdata.DB.Create(&readHistory)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrDuplicatedKey) {
 			// Successful response is intentional
-			return c.JSON(fiber.Map{
-				"error": "This chapter is already marked read",
-			})
+			return c.JSON(models.ErrorResponse{Error: "This chapter is already marked as read"})
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Something went wrong, try again later",
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 		}
 	}
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"book":         bookStruct.Book,
-		"abbreviation": bookStruct.Abbreviation,
-		"chapter":      req.Chapter,
-		"message":      "Chapter marked as read",
-	})
+	response := models.MarkChapterAsReadResponse{
+		Book:         bookStruct.Book,
+		Abbreviation: bookStruct.Abbreviation,
+		Chapter:      req.Chapter,
+		Message:      "Chapter marked as read",
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
+// MarkChapterAsUnread godoc
+// @Summary      Mark a chapter as unread
+// @Description  Mark a chapter from the Bible as unread
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Param        chapter  body  models.BibleChapter  true  "Bible chapter to mark as unread"
+// @Security     BearerAuth
+// @Success      200  {object}  models.MarkChapterAsReadResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router       /markchapterasread [delete]
 func MarkChapterAsUnread(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 
 	// Deserialize JSON body
-	var req struct {
-		BookID       uint   `json:"book_id"`
-		Book         string `json:"book"`
-		Abbreviation string `json:"abbreviation"`
-		Chapter      uint   `json:"chapter"`
-	}
-
+	var req models.BibleChapter
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.NewInvalidRequestBodyError())
 	}
 
 	req.Abbreviation = strings.ToUpper(req.Abbreviation)
@@ -121,9 +117,7 @@ func MarkChapterAsUnread(c *fiber.Ctx) error {
 
 	if req.BookID != 0 {
 		if req.BookID < 1 || req.BookID > 66 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid book",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book"})
 		}
 		bookNum = req.BookID
 
@@ -144,33 +138,41 @@ func MarkChapterAsUnread(c *fiber.Ctx) error {
 	}
 
 	if bookNum == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid book",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book"})
 	}
 
 	var readHistory models.ReadHistory
 	result := appdata.DB.Where("user_id = ? AND book = ? AND chapter = ?", user_id, bookNum, req.Chapter).First(&readHistory)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.JSON(fiber.Map{
-				"error": "This book and chapter is not marked as read",
-			})
+			return c.JSON(models.ErrorResponse{Error: "This chapter is not marked as read"})
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Something went wrong, try again later",
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 		}
 	}
 	appdata.DB.Delete(&readHistory)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"book":         appdata.Books[bookNum-1].Book,
-		"abbreviation": appdata.Books[bookNum-1].Abbreviation,
-		"chapter":      req.Chapter,
-		"message":      "Chapter marked as unread",
-	})
+
+	response := models.MarkChapterAsReadResponse{
+		Book:         appdata.Books[bookNum-1].Book,
+		Abbreviation: appdata.Books[bookNum-1].Abbreviation,
+		Chapter:      req.Chapter,
+		Message:      "Chapter marked as unread",
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response)
 }
 
+// MarkBookAsRead godoc
+// @Summary      Mark a whole book read
+// @Description  Mark a book of the Bible as read
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Security     BearerAuth
+// @Success      200  {object}  models.MarkBookReadResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router 		 /markbookasread/{bookid} [post]
 func MarkBookAsRead(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -179,9 +181,7 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
 	if err == nil {
 		if bookIDUint64 > 66 || bookIDUint64 < 1 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid book id",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 		}
 	} else {
 		for i := range appdata.Books {
@@ -201,9 +201,7 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 	}
 
 	if bookIDUint64 == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid book id",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 	}
 
 	bookStruct := appdata.Books[bookIDUint64-1]
@@ -211,9 +209,7 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 	// reset history in this book
 	if err := appdata.DB.Where("user_id = ? AND book = ?", userID, uint(bookIDUint64)).
 		Delete(&models.ReadHistory{}).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to reset book read history",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Invalid book id"})
 	}
 
 	// construct read history entries
@@ -228,19 +224,30 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 
 	// insert in batches to avoid one-by-one inserts
 	if err := appdata.DB.CreateInBatches(readHistories, 100).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to mark book as read",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message":      "Book marked as read",
-		"book":         bookStruct.Book,
-		"abbreviation": bookStruct.Abbreviation,
-		"count":        len(readHistories),
-	})
+	response := models.MarkBookReadResponse{
+		Message:      "Book marked as read",
+		Book:         bookStruct.Book,
+		Abbreviation: bookStruct.Abbreviation,
+		Count:        len(readHistories),
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
+// MarkBookAsUnread godoc
+// @Summary      Mark a whole book unread
+// @Description  Mark a book of the Bible as unread
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Security     BearerAuth
+// @Success      200  {object}  models.MarkBookReadResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router 		 /markbookasread/{bookid} [delete]
 func MarkBookAsUnread(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 	bookIDStr := c.Params("bookid")
@@ -248,9 +255,7 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
 	if err == nil {
 		if bookIDUint64 > 66 || bookIDUint64 < 1 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid book id",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 		}
 	} else {
 		for i := range appdata.Books {
@@ -270,26 +275,36 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 	}
 
 	if bookIDUint64 == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid book id",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 	}
 
 	// Delete entries history in this book
 	if err := appdata.DB.Where("user_id = ? AND book = ?", userID, uint(bookIDUint64)).
 		Delete(&models.ReadHistory{}).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to reset book read history",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 	}
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"book":         appdata.Books[bookIDUint64-1].Book,
-		"abbreviation": appdata.Books[bookIDUint64-1].Abbreviation,
-		"message":      "Read history for book deleted",
-	})
+	response := models.MarkBookReadResponse{
+		Message:      "Book marked as unread",
+		Book:         appdata.Books[bookIDUint64-1].Book,
+		Abbreviation: appdata.Books[bookIDUint64-1].Abbreviation,
+		Count:        int(appdata.Books[bookIDUint64-1].Chapters), // Not counting the number of rows deleted from the DB.
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(response)
 }
 
+// GetReadChaptersOfBook godoc
+// @Summary      Get read chapter numbers for a book
+// @Description  Returns the list of chapters marked as read for the specified book.
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Security     BearerAuth
+// @Success      200  {object}  models.BookReadChaptersResponse
+// @Failure      401  {object}  models.ErrorResponse
+// @Router 		 /readchaptersofbook/{bookid} [get]
 func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -298,9 +313,7 @@ func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	bookIDUint64, err := strconv.ParseUint(bookIDStr, 10, 64)
 	if err == nil {
 		if bookIDUint64 > 66 || bookIDUint64 < 1 {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid book id",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 		}
 	} else {
 		for i := range appdata.Books {
@@ -320,9 +333,7 @@ func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	}
 
 	if bookIDUint64 == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid book id",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Invalid book id"})
 	}
 	bookID := uint(bookIDUint64)
 
@@ -331,9 +342,7 @@ func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	if err := appdata.DB.
 		Where("user_id = ? AND book = ?", userID, bookID).
 		Find(&histories).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to fetch read chapters",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 	}
 
 	// Collect chapters
@@ -342,15 +351,27 @@ func GetReadChaptersOfBook(c *fiber.Ctx) error {
 		readChapters = append(readChapters, h.Chapter)
 	}
 
-	// Return JSON
-	return c.JSON(fiber.Map{
-		"book_id":       bookID,
-		"book":          appdata.Books[bookID-1].Book,
-		"abbreviation":  appdata.Books[bookID-1].Abbreviation,
-		"read_chapters": readChapters,
-	})
+	response := models.BookReadChaptersResponse{
+		BookID:       bookID,
+		Book:         appdata.Books[bookID-1].Book,
+		Abbreviation: appdata.Books[bookID-1].Abbreviation,
+		ReadChapters: readChapters,
+	}
+
+	return c.JSON(response)
+
 }
 
+// GetReadBooksStatus godoc
+// @Summary      Get read progress of all Bible books
+// @Description  Returns the read status for each book in the Bible (complete, partial and not_started).
+// @Tags         read_history
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success 	 200 {array} models.ReadBook
+// @Failure      401  {object}  models.ErrorResponse
+// @Router 		 /readbooksstatus [get]
 func GetReadBooksStatus(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -359,9 +380,7 @@ func GetReadBooksStatus(c *fiber.Ctx) error {
 	if err := appdata.DB.
 		Where("user_id = ?", userID).
 		Find(&histories).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to fetch read history",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 	}
 
 	// Of the form {"book_id": count}, like {1: 10}, which means Genesis 10 chapters in read history
