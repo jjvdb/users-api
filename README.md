@@ -1,6 +1,5 @@
-# VerseQuick Users API
+# Users API
 
-- This is the Users API for [VerseQuick](https://versequick.com).
-- This API will register users and save their bookmarks and the chapters they have completed.
-
-This is a work in progress. The frontend will be updated once the API is completely ready. 
+- This is the Users API for [bible.berinaniesh.xyz](https://bible.berinaniesh.xyz).
+- Right now, it is deployed [here](https://api.scripture.pp.ua/users/docs).
+- This API will register users and save their bookmarks and reading progress.
