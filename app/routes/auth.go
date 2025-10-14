@@ -45,15 +45,11 @@ func LoginUser(c *fiber.Ctx) error {
 			errorMessage = "Something went wrong, try again later"
 			returnStatus = fiber.StatusInternalServerError
 		}
-		return c.Status(returnStatus).JSON(fiber.Map{
-			"error": errorMessage,
-		})
+		return c.Status(returnStatus).JSON(models.ErrorResponse{Error: errorMessage})
 	}
 	passwordCorrect := utils.CheckPassword(req.Password, user.Password)
 	if !passwordCorrect {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Wrong Password",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Wrong password"})
 	}
 	jwtToken := utils.PrepareAccessToken(&user, req.Remember)
 	refreshToken := utils.PrepareRefreshToken(&user, req.Device, req.Location, req.Remember)
@@ -70,40 +66,29 @@ func LoginUser(c *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Param        Refresh  header  string  true  "Refresh token"
-// @Success      200  {object}  map[string]string  "access_token and refresh_token"
-// @Failure      400  {object}  map[string]string  "Bad request or token issues"
-// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Success      200  {object}  models.LoginResponse
+// @Failure      401  {object}  models.ErrorResponse
 // @Router       /refresh [post]
 func RefreshToken(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
 	if token == "" {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Bad Token",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "No refresh token in header. You'll have to send the previous refresh token to get a new set now"})
 	}
 	var refresh models.RefreshToken
 	result := appdata.DB.Where("token = ?", token).First(&refresh)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Token not found",
-			})
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Refresh token not found in DB"})
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Something went wrong, try again later",
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 		}
 	}
 	now := time.Now()
 	if refresh.ExpiresAt.Before(now) {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Token expired, get a new one at /login",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Refresh token expired, login again."})
 	}
 	if refresh.Revoked {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Token reuse detected, get a new one at /login",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Refresh token reuse detected, login again."})
 	}
 	refresh.Revoked = true
 	appdata.DB.Save(&refresh)
@@ -111,10 +96,7 @@ func RefreshToken(c *fiber.Ctx) error {
 	appdata.DB.First(&user, refresh.UserID)
 	newJwtToken := utils.PrepareAccessToken(&user, refresh.Remember)
 	newRefresh := utils.PrepareRefreshToken(&user, refresh.Device, refresh.Location, refresh.Remember)
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"access_token":  newJwtToken,
-		"refresh_token": newRefresh,
-	})
+	return c.Status(fiber.StatusOK).JSON(models.LoginResponse{AccessToken: newJwtToken, RefreshToken: newRefresh})
 }
 
 // LogoutAll godoc
@@ -123,15 +105,15 @@ func RefreshToken(c *fiber.Ctx) error {
 // @Tags         auth
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        Authorization  header  string  true  "Bearer JWT token"
-// @Success      200  {object}  map[string]string  "Logout confirmation message"
-// @Failure      401  {object}  map[string]string  "Unauthorized, invalid or missing JWT"
-// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Success      200  {object}  models.GenericMessage
+// @Failure      401  {object}  models.ErrorResponse
 // @Router       /logout/all [post]
 func LogoutAll(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 	appdata.DB.Where("user_id = ?", user_id).Delete(&models.RefreshToken{})
-	return c.JSON(fiber.Map{"message": fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices completely.", appdata.JwtExpiryMinutes)})
+	return c.JSON(models.GenericMessage{Message: fmt.Sprintf("Logout successful, it might take upto %d minutes to log out of all devices completely.", appdata.JwtExpiryMinutes)})
 }
 
 // Logout godoc
@@ -141,39 +123,30 @@ func LogoutAll(c *fiber.Ctx) error {
 // @Accept       json
 // @Produce      json
 // @Param        Refresh  header  string  true  "Refresh token"
-// @Success      200  {object}  map[string]string  "Logout confirmation message"
-// @Failure      400  {object}  map[string]string  "Bad request or token issues"
-// @Failure      500  {object}  map[string]string  "Internal server error"
+// @Success      200  {object}  models.GenericMessage
+// @Failure      400  {object}  models.ErrorResponse
 // @Router       /logout [post]
 func Logout(c *fiber.Ctx) error {
 	token := c.Get("Refresh")
 	if token == "" {
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Need refresh token in the header",
-		})
+		c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "Need refresh token in the header"})
 	}
 	var refreshToken models.RefreshToken
 	result := appdata.DB.Where("token = ?", token).First(&refreshToken)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Refresh token invalid",
-			})
+			return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Error: "Refresh token not found in DB"})
 		} else {
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Something went wrong, try again later",
-			})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 		}
 	}
 
 	// Delete the refresh token
 	if err := appdata.DB.Delete(&refreshToken).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to delete refresh token",
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(models.NewInternalError())
 	}
 
-	return c.JSON(fiber.Map{
-		"message": fmt.Sprintf("Logout successful, it might take up to %d minutes to log out of the device completely.", appdata.JwtExpiryMinutes),
+	return c.JSON(models.GenericMessage{
+		Message: fmt.Sprintf("Logout successful, it might take up to %d minutes to log out of the device completely.", appdata.JwtExpiryMinutes),
 	})
 }

@@ -3,6 +3,9 @@
 // @description     Fiber API with Swagger
 // @host            api.scripture.pp.ua
 // @BasePath        /users
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 package main
 

@@ -5,6 +5,11 @@ definitions:
       error:
         type: string
     type: object
+  models.GenericMessage:
+    properties:
+      message:
+        type: string
+    type: object
   models.LoginRequest:
     properties:
       device:
@@ -75,23 +80,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: Logout confirmation message
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.GenericMessage'
         "400":
-          description: Bad request or token issues
+          description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Logout user from current device
       tags:
       - auth
@@ -111,23 +106,15 @@ paths:
       - application/json
       responses:
         "200":
-          description: Logout confirmation message
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.GenericMessage'
         "401":
-          description: Unauthorized, invalid or missing JWT
+          description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Logout user from all devices
       tags:
       - auth
@@ -147,24 +134,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: access_token and refresh_token
+          description: OK
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Bad request or token issues
+            $ref: '#/definitions/models.LoginResponse'
+        "401":
+          description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal server error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Refresh JWT token
       tags:
       - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
