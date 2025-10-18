@@ -13,16 +13,25 @@ import (
 )
 
 // MarkChapterAsRead godoc
-// @Summary      Mark a chapter as read
-// @Description  Mark a chapter from the Bible as read
+// @Summary      Record a completed Bible chapter
+// @Description  Records that the current user has finished reading a specific Bible chapter.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
-// @Param        chapter  body  models.BibleChapter  true  "Bible chapter to mark as read"
+// @Param        chapter  body  models.BibleChapter  true  "Details which Bible chapter to mark as completed"
+// @Success      201  {object}  models.MarkChapterAsReadResponse "Chapter successfully recorded as read"
+// @Example 201 {json} {
+//   "message": "Chapter marked as read",
+//   "book": "John",
+//   "abbreviation": "JHN",
+//   "chapter": 3
+// }
+// @Failure      400  {object}  models.ErrorResponse "Invalid input"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success      200  {object}  models.MarkChapterAsReadResponse
-// @Failure      401  {object}  models.ErrorResponse
 // @Router       /markchapterasread [post]
+
 func MarkChapterAsRead(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -92,16 +101,25 @@ func MarkChapterAsRead(c *fiber.Ctx) error {
 }
 
 // MarkChapterAsUnread godoc
-// @Summary      Mark a chapter as unread
-// @Description  Mark a chapter from the Bible as unread
+// @Summary      Unmark a completed Bible chapter
+// @Description  Removes a Bible chapter from the current user's list of completed (read) chapters.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
-// @Param        chapter  body  models.BibleChapter  true  "Bible chapter to mark as unread"
+// @Param        chapter  body  models.BibleChapter  true  "Details which Bible chapter to mark as unread"
+// @Success      200  {object}  models.MarkChapterAsReadResponse "Chapter successfully marked as unread"
+// @Example 200 {json} {
+//   "message": "Chapter marked as unread",
+//   "book": "John",
+//   "abbreviation": "JHN",
+//   "chapter": 3
+// }
+// @Failure      400  {object}  models.ErrorResponse "Invalid input"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success      200  {object}  models.MarkChapterAsReadResponse
-// @Failure      401  {object}  models.ErrorResponse
 // @Router       /markchapterasread [delete]
+
 func MarkChapterAsUnread(c *fiber.Ctx) error {
 	user_id := utils.GetUserFromJwt(c)
 
@@ -163,16 +181,25 @@ func MarkChapterAsUnread(c *fiber.Ctx) error {
 }
 
 // MarkBookAsRead godoc
-// @Summary      Mark a whole book read
-// @Description  Mark a book of the Bible as read
+// @Summary      Mark a fully completed Bible book
+// @Description  Records that the current user has finished reading all the chapters in a specific Bible book.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
-// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Param        bookid   path  string  true  "Book identifier, either: the full name of the book (for example, '3 John'), abbreviation (for example, '3JN'), or the book number (1-66)"
+// @Success      201  {object}  models.MarkBookReadResponse "Book successfully marked as read"
+// @Example 201 {json} {
+//   "message": "Book marked as read",
+//   "book": "John",
+//   "abbreviation": "JHN",
+//   "count": 21
+// }
+// @Failure      400  {object}  models.ErrorResponse "Invalid input"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success      200  {object}  models.MarkBookReadResponse
-// @Failure      401  {object}  models.ErrorResponse
 // @Router 		 /markbookasread/{bookid} [post]
+
 func MarkBookAsRead(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -238,16 +265,25 @@ func MarkBookAsRead(c *fiber.Ctx) error {
 }
 
 // MarkBookAsUnread godoc
-// @Summary      Mark a whole book unread
-// @Description  Mark a book of the Bible as unread
+// @Summary      Unmark a fully completed Bible book
+// @Description  Removes all Bible chapters of a specific book from the current user's list of completed (read) chapters.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
-// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Param        bookid   path  string  true  "Book identifier, either: the full name of the book (for example, '3 John'), abbreviation (for example, '3JN'), or the book number (1-66)"
+// @Success      200  {object}  models.MarkBookReadResponse "Book successfully marked as unread"
+// @Example 200 {json} {
+//   "message": "Book marked as unread",
+//   "book": "John",
+//   "abbreviation": "JHN",
+//   "count": 21
+// }
+// @Failure      400  {object}  models.ErrorResponse "Invalid input"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success      200  {object}  models.MarkBookReadResponse
-// @Failure      401  {object}  models.ErrorResponse
-// @Router 		 /markbookasread/{bookid} [delete]
+// @Router 		 /markbookasunread/{bookid} [delete]
+
 func MarkBookAsUnread(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 	bookIDStr := c.Params("bookid")
@@ -295,16 +331,25 @@ func MarkBookAsUnread(c *fiber.Ctx) error {
 }
 
 // GetReadChaptersOfBook godoc
-// @Summary      Get read chapter numbers for a book
-// @Description  Returns the list of chapters marked as read for the specified book.
+// @Summary      Get read chapter numbers for a Bible book
+// @Description  Retrieves a list of chapter numbers that the current user has marked as read for the specified Bible book.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
-// @Param        bookid   path  string  true  "ID of the book, can be the name of the book, abbreviation or the number (1-66)"
+// @Param        bookid   path  string  true  "Book identifier, either: the full name of the book (for example, '3 John'), abbreviation (for example, '3JN'), or the book number (1-66)"
+// @Success      200  {object}  models.BookReadChaptersResponse "List of read chapters for the specified book"
+// @Example 200 {json} {
+//   "bookId": 43,
+//   "book": "John",
+//   "abbreviation": "JHN",
+//   "readChapters": [1,2,3,4,5]
+// }
+// @Failure      400  {object}  models.ErrorResponse "Invalid book ID"
+// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object}  models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success      200  {object}  models.BookReadChaptersResponse
-// @Failure      401  {object}  models.ErrorResponse
 // @Router 		 /readchaptersofbook/{bookid} [get]
+
 func GetReadChaptersOfBook(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 
@@ -363,15 +408,22 @@ func GetReadChaptersOfBook(c *fiber.Ctx) error {
 }
 
 // GetReadBooksStatus godoc
-// @Summary      Get read progress of all Bible books
-// @Description  Returns the read status for each book in the Bible (complete, partial and not_started).
+// @Summary      Get reading progress for all Bible books
+// @Description  Retrieves the reading status for each book in the Bible for the current user, indicating whether it is complete, partially read, or not started.
 // @Tags         read_history
 // @Accept       json
 // @Produce      json
+// @Success      200  {array}  models.ReadBook "List of books with reading status"
+// @Example 200 {json} [
+//   { "book": "Genesis", "abbreviation": "GEN", "status": "complete" },
+//   { "book": "Exodus", "abbreviation": "EXO", "status": "partial" },
+//   { "book": "Leviticus", "abbreviation": "LEV", "status": "not_started" }
+// ]
+// @Failure      401  {object} models.ErrorResponse "Unauthorized - missing/invalid token"
+// @Failure      500  {object} models.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Success 	 200 {array} models.ReadBook
-// @Failure      401  {object}  models.ErrorResponse
-// @Router 		 /readbooksstatus [get]
+// @Router       /readbooksstatus [get]
+
 func GetReadBooksStatus(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 

@@ -11,7 +11,7 @@ import (
 
 // CreateNote godoc
 // @Summary      Create a note
-// @Description  Notate a specific scripture reference for the logged in user.
+// @Description  Adds a note to a specific verse for the current user.
 // @Tags         notes
 // @Accept       application/x-www-form-urlencoded
 // @Produce      json
@@ -69,7 +69,7 @@ func CreateNote(c *fiber.Ctx) error {
 
 // DeleteNote godoc
 // @Summary      Delete a note
-// @Description  Removes an existing note for the logged in user.
+// @Description  Removes an existing note for the current user.
 // @Tags         notes
 // @Produce      json
 // @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)

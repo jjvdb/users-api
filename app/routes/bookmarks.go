@@ -10,8 +10,8 @@ import (
 )
 
 // AddBookmark godoc
-// @Summary      Add a bookmark.
-// @Description  Marks a specific scripture reference for the logged in user.
+// @Summary      Add a bookmark
+// @Description  Adds a marker to a specific Bible verse for the current user.
 // @Tags         bookmarks
 // @Accept       application/x-www-form-urlencoded
 // @Produce      json
@@ -63,8 +63,8 @@ func AddBookmark(c *fiber.Ctx) error {
 }
 
 // DeleteBookmark godoc
-// @Summary      Delete a bookmark.
-// @Description  Removes an existing bookmark.
+// @Summary      Delete a bookmark
+// @Description  Removes an existing bookmark for the current user.
 // @Tags         bookmarks
 // @Accept       application/x-www-form-urlencoded
 // @Produce      json
