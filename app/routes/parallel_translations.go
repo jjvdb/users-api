@@ -10,22 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// SetParallelTranslations godoc
-// @Summary      Configure one or more preferred parallel translations
-// @Description  Enables the current user to choose which Bible translations appear in parallel with a source translation.
-// @Tags         parallel
-// @Accept       json
-// @Produce      json
-// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Param        body body object true "Parallel translation configuration" example({"source_translation": "KJV", "parallel_translations": ["TOVBSI", "GOVBSI", "ASV"]})
-// @Success      201  {object}  models.GenericMessage "Records created successfully"
-// @Example 201 {json} {"message": "Records created successfully"}
-// @Failure      400  {object}  models.ErrorResponse "Invalid request body"
-// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
-// @Failure      500  {object}  models.ErrorResponse "Internal server error"
-// @Security     BearerAuth
-// @Router       /parallel [post]
-
 func SetParallelTranslations(c *fiber.Ctx) error {
 
 	userID := utils.GetUserFromJwt(c)
@@ -68,19 +52,6 @@ func SetParallelTranslations(c *fiber.Ctx) error {
 	})
 }
 
-// DeleteAllParallelTranslations godoc
-// @Summary      Delete all parallel translations
-// @Description  Removes all configured parallel Bible translations for the current user.
-// @Tags         parallel
-// @Produce      json
-// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Success      202  {object}  models.GenericMessage "Records deleted successfully"
-// @Example 202 {json} {"message": "Records deleted successfully"}
-// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
-// @Failure      500  {object}  models.ErrorResponse "Internal server error"
-// @Security     BearerAuth
-// @Router       /parallel [delete]
-
 func DeleteAllParallelTranslations(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
 	appdata.DB.Where("user_id = ?", userID).Delete(&models.ParallelTranslations{})
@@ -88,20 +59,6 @@ func DeleteAllParallelTranslations(c *fiber.Ctx) error {
 		"message": "Records deleted successfully",
 	})
 }
-
-// DeleteParallelTranslations godoc
-// @Summary      Delete a specific parallel translation
-// @Description  Removes a specific parallel Bible translation for the current user.
-// @Tags         parallel
-// @Produce      json
-// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Param        translation path string true "Translation to remove" example("GOVBSI")
-// @Success      202  {object}  models.GenericMessage "Records deleted successfully"
-// @Example 202 {json} {"message": "Records deleted successfully"}
-// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
-// @Failure      500  {object}  models.ErrorResponse "Internal server error"
-// @Security     BearerAuth
-// @Router       /parallel/{translation} [delete]
 
 func DeleteParallelTranslations(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
@@ -111,22 +68,6 @@ func DeleteParallelTranslations(c *fiber.Ctx) error {
 		"message": "Records deleted successfully",
 	})
 }
-
-// GetAllParallelTranslations godoc
-// @Summary      Lists all configured parallel Bible translations
-// @Description  Returns every configured set of parallel Bible translations for the current user.
-// @Tags         parallel
-// @Produce      json
-// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Success      200  {array}  models.ParallelTranslationResponse "List of all configured parallel Bible translations"
-// @Example 200 {json} [
-//   { "sourceTranslation": "KJV", "parallelTranslations": ["TOVBSI","ASV"] },
-//   { "sourceTranslation": "MSLVP", "parallelTranslations": ["ASV","WEB"] }
-// ]
-// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
-// @Failure      500  {object}  models.ErrorResponse "Internal server error"
-// @Security     BearerAuth
-// @Router       /parallel [get]
 
 func GetAllParallelTranslations(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
@@ -155,20 +96,6 @@ func GetAllParallelTranslations(c *fiber.Ctx) error {
 
 	return c.JSON(response)
 }
-
-// GetParallelTranslations godoc
-// @Summary      Lists the parallel Bible translations for a specific source translation
-// @Description  Returns the current user's configured parallel Bible translations for a given source translation.
-// @Tags         parallel
-// @Produce      json
-// @Param        Authorization header string true "Bearer JWT token" default(Bearer <token>)
-// @Param        translation path string true "Source translation code" example("KJV")
-// @Success      200  {object}  models.ParallelTranslationResponse "List of parallel Bible translations for the specified source translation"
-// @Example 200 {json} { "sourceTranslation": "KJV", "parallelTranslations": ["TOVBSI","ASV"] }
-// @Failure      401  {object}  models.ErrorResponse "Unauthorized - missing/invalid token"
-// @Failure      500  {object}  models.ErrorResponse "Internal server error"
-// @Security     BearerAuth
-// @Router       /parallel/{translation} [get]
 
 func GetParallelTranslations(c *fiber.Ctx) error {
 	userID := utils.GetUserFromJwt(c)
